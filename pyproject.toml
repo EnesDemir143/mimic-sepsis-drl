@@ -1,0 +1,17 @@
+[project]
+name = "drl-tryout"
+version = "0.1.0"
+description = "Deep Reinforcement Learning on Mac GPU"
+requires-python = ">=3.11,<3.13" # 3.13 yerine 3.11 veya 3.12 daha stabildir
+dependencies = [
+    "jax>=0.4.30",
+    "jaxlib>=0.4.30",
+    "jax-metal>=0.1.0; sys_platform == 'darwin'",
+    "jax[cuda12]>=0.4.30; sys_platform == 'linux'",
+    "flax>=0.8.5",
+    "optax>=0.2.2",
+    "gymnasium[classic-control]>=1.0.0",
+    "numpy>=1.26.0",
+    "dvc>=3.66.1",
+    "dvc-gdrive>=3.0.1",
+]
