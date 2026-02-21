@@ -260,4 +260,6 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,jupyternotebooks,linux,git
 
-data/
+/data/*
+!/data/*.dvc
+!/data/.gitignore
