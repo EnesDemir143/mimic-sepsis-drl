@@ -1,19 +1,3 @@
-"""
-Deep Reinforcement Learning with JAX — DQN on CartPole-v1
-=========================================================
-
-Bu örnek şunları içeriyor:
-  • Flax (linen) ile Q-Network tanımlama
-  • Optax ile adam optimizer
-  • Experience Replay Buffer
-  • Epsilon-greedy exploration
-  • Target network (soft update)
-  • JAX jit ile hızlandırılmış train step
-
-Çalıştırmak için:
-    uv run python main.py
-"""
-
 from __future__ import annotations
 
 import os
@@ -21,7 +5,6 @@ import random
 from collections import deque
 from typing import NamedTuple
 
-# Apple Silicon Metal GPU — jax-metal 0.1.1 + jaxlib 0.4.38
 
 import gymnasium as gym
 import jax
