@@ -260,10 +260,19 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,jupyternotebooks,linux,git
 
-/data/*
+# 1. Önce bütün data klasörünü tamamen kapat
+/data/
+
+# 2. Sadece klasör yapısını gezebilmesi için kapıyı arala
+!/data/
 !/data/**/
-/data/**/*.csv
-/data/**/*.parquet
-/data/**/*.gz
+
+# 3. İzin verilecek özel dosyalar (İstisnalar)
 !/data/**/*.dvc
 !/data/**/.gitignore
+
+# 4. Geri kalan her şeyi (Parquet, CSV, GZ) kesin olarak reddet
+/data/**/*.parquet
+/data/**/*.csv
+/data/**/*.gz
+/data/raw/
