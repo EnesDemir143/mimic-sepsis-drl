@@ -16,4 +16,5 @@ dependencies = [
     "dvc-gdrive>=3.0.1",
     "polars>=1.0.0",
     "tqdm>=4.66.0",
+    "pyarrow>=23.0.1",
 ]
