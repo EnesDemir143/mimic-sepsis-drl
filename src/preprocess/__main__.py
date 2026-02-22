@@ -5,7 +5,7 @@ Kullanım:
     uv run python -m src.preprocess
 """
 
-from src.preprocess.pipeline import run_pipeline
+from src.preprocess.state import run
 
 if __name__ == "__main__":
-    run_pipeline()
+    run()
