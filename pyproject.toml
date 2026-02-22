@@ -17,4 +17,6 @@ dependencies = [
     "polars>=1.0.0",
     "tqdm>=4.66.0",
     "pyarrow>=23.0.1",
+    "matplotlib>=3.10.8",
+    "seaborn>=0.13.2",
 ]
