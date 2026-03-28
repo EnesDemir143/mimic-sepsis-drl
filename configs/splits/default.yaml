@@ -1,0 +1,29 @@
+# Patient-level split configuration
+# ---------------------------------------------------------------------------
+# All fractions are applied to unique patient identifiers (subject_id).
+# Rows for a given patient are **never** split across partitions.
+#
+# Downstream transforms (scalers, imputers, bin thresholds, behaviour
+# estimators) MUST be fit on the train partition only.
+# ---------------------------------------------------------------------------
+
+split:
+  seed: 42                   # fixed seed — must match what is saved in the manifest
+  train_fraction: 0.70
+  validation_fraction: 0.15
+  test_fraction: 0.15
+  # stratify_by: "mortality"  # optional column for stratified splitting
+
+source:
+  # Path to the episode set that is partitioned.
+  # Can be overridden from CLI: --source-episode-set <path>
+  episode_set: "data/processed/episodes.parquet"
+
+output:
+  # Directory where manifest artifacts are persisted.
+  manifest_dir: "data/splits"
+  # File names (relative to manifest_dir)
+  train_manifest:      "train_manifest.parquet"
+  validation_manifest: "validation_manifest.parquet"
+  test_manifest:       "test_manifest.parquet"
+  summary_json:        "split_summary.json"
