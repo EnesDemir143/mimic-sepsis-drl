@@ -1,0 +1,57 @@
+# Onset assignment configuration — MIMIC Sepsis Offline RL
+# Version: 1.0.0
+#
+# Operationalized Sepsis-3 onset parameters.
+# Change values here for sensitivity analyses; the spec class
+# (onset_models.py) defines the typed contract.
+
+spec_version: "1.0.0"
+
+# -------------------------------------------------------------------
+# Sepsis-3 onset operationalization
+# -------------------------------------------------------------------
+onset:
+  # Time window (hours) around suspected_infection_time to search
+  # for a qualifying SOFA increase.  Sepsis-3 definition:
+  # SOFA ≥ 2 within [-24h, +24h] of suspected infection.
+  lookback_hours: 24
+  lookahead_hours: 24
+
+  # Minimum SOFA score increase to qualify as organ dysfunction
+  min_sofa_increase: 2
+
+  # When multiple candidates exist, pick the earliest onset
+  tie_break: "earliest"
+
+# -------------------------------------------------------------------
+# ICU boundary enforcement
+# -------------------------------------------------------------------
+icu_boundary:
+  # If True, reject onset times that fall outside [intime, outtime]
+  require_within_icu: true
+
+  # Grace period (hours) before intime — onset slightly before
+  # ICU admission may still be clinically meaningful
+  grace_before_intime_hours: 6.0
+
+# -------------------------------------------------------------------
+# Source table references (override if schema differs)
+# -------------------------------------------------------------------
+source_tables:
+  icustays: "mimiciv_icu.icustays"
+  microbiologyevents: "mimiciv_hosp.microbiologyevents"
+  prescriptions: "mimiciv_hosp.prescriptions"
+  # If pre-computed Sepsis-3 derived table exists:
+  sepsis3_derived: null
+
+# -------------------------------------------------------------------
+# Paths (relative to project root)
+# -------------------------------------------------------------------
+input:
+  cohort_parquet: "data/processed/cohort/cohort.parquet"
+
+output:
+  onset_parquet: "data/processed/onset/onset_assignments.parquet"
+  unusable_parquet: "data/processed/onset/unusable_episodes.parquet"
+  candidates_parquet: "data/processed/onset/onset_candidates.parquet"
+  audit_json: "data/processed/onset/onset_audit.json"
