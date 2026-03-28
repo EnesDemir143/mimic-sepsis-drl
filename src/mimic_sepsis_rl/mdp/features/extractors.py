@@ -96,6 +96,7 @@ class FeatureExtractor(Protocol):
         window_df: pl.DataFrame,
         spec: FeatureSpec,
         context: "ExtractionContext",
+        impute: bool = True,
     ) -> float | None:
         """Return the aggregated value for ``spec`` from ``window_df``.
 
@@ -108,6 +109,9 @@ class FeatureExtractor(Protocol):
             Feature contract describing source, item IDs, aggregation, etc.
         context:
             Episode-level context (prior values for forward-fill, weight, etc.)
+        impute:
+            When True, apply the feature's missing-data policy after raw
+            extraction. When False, return only directly observed values.
 
         Returns
         -------
@@ -195,6 +199,7 @@ class BaseWindowExtractor(ABC):
         window_df: pl.DataFrame,
         spec: FeatureSpec,
         context: ExtractionContext,
+        impute: bool = True,
     ) -> float | None:
         """Full extraction pipeline for one feature in one step window."""
         # Step 1 — filter to item IDs (skip for derived / demographics)
@@ -215,7 +220,7 @@ class BaseWindowExtractor(ABC):
         raw = self._extract_raw(item_df, spec, context)
 
         # Step 4 — imputation when raw is None
-        if raw is None:
+        if raw is None and impute:
             raw = self._impute(spec, context)
 
         # Step 5 — clip
@@ -570,6 +575,8 @@ class StepWindowData:
         Patient age at ICU admission (static per episode).
     weight_kg : float | None
         Admission body weight (static per episode).
+    subject_id : int | None
+        Optional patient identifier for manifest-aware downstream builders.
     """
 
     stay_id: int
@@ -581,6 +588,7 @@ class StepWindowData:
     outputevents: pl.DataFrame
     age_years: float | None = None
     weight_kg: float | None = None
+    subject_id: int | None = None
 
     def get_df_for_table(self, table: str) -> pl.DataFrame:
         """Return the appropriate DataFrame for ``table``."""
