@@ -1,0 +1,49 @@
+# Cohort configuration — MIMIC Sepsis Offline RL
+# Version: 1.0.0
+#
+# This file is the executable representation of the cohort specification
+# defined in src/mimic_sepsis_rl/data/cohort/spec.py.
+# Change values here to run sensitivity analyses; change the spec class
+# to add or remove rule categories.
+
+spec_version: "1.0.0"
+
+# -------------------------------------------------------------------
+# Adult restriction (top-level flag — checked first by the CLI)
+# -------------------------------------------------------------------
+adult_only: true
+
+# -------------------------------------------------------------------
+# Inclusion criteria
+# -------------------------------------------------------------------
+inclusion:
+  min_age_years: 18
+  require_icu_stay: true
+  require_sepsis3: true
+  min_los_hours: 4.0
+
+# -------------------------------------------------------------------
+# Exclusion criteria
+# -------------------------------------------------------------------
+exclusion:
+  exclude_missing_sepsis_anchor: true
+  exclude_readmissions: true
+  exclude_missing_demographics: true
+  max_age_years: null  # null = no upper age limit
+
+# -------------------------------------------------------------------
+# Source table references (schema.table)
+# -------------------------------------------------------------------
+source_tables:
+  icustays: "mimiciv_icu.icustays"
+  patients: "mimiciv_hosp.patients"
+  admissions: "mimiciv_hosp.admissions"
+  sepsis3: "mimiciv_derived.sepsis3"
+
+# -------------------------------------------------------------------
+# Output paths (relative to project root)
+# -------------------------------------------------------------------
+output:
+  cohort_parquet: "data/processed/cohort/cohort.parquet"
+  audit_json: "data/processed/cohort/audit.json"
+  excluded_parquet: "data/processed/cohort/excluded.parquet"
