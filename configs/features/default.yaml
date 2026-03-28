@@ -1,0 +1,157 @@
+# Feature Dictionary Configuration — v1
+# =======================================
+# Controls which features are active, missingness-flag behaviour,
+# and per-feature tuning overrides for the Phase 4 state pipeline.
+#
+# This file is the single place to adjust feature selection and
+# preprocessing parameters without touching source code.
+#
+# Loaded by:
+#   python -m mimic_sepsis_rl.mdp.features.dictionary \
+#       --config configs/features/default.yaml --validate
+#
+# Keys
+# ----
+# include_features      : list[str] | null
+#   If set, only these feature IDs are included in the registry.
+#   Set to null (default) to include every feature in the v1 contract.
+#
+# exclude_features      : list[str]
+#   Feature IDs to drop even when include_features is null.
+#   Useful for ablation studies or dataset-specific gaps.
+#
+# missingness_flags_default : bool | null
+#   When true/false, overrides include_missingness_flag for ALL features.
+#   null (default) respects the per-feature setting in dictionary.py.
+#
+# Version history
+# ---------------
+# v1.0.0  2026-04-01  Initial config for Phase 4.
+
+spec_version: "1.0.0"
+
+# ---------------------------------------------------------------------------
+# Feature selection
+# ---------------------------------------------------------------------------
+
+# null → use all features defined in the v1 registry
+include_features: null
+
+# No features excluded in the default run.
+# Example: exclude_features: [albumin, base_excess]
+exclude_features: []
+
+# ---------------------------------------------------------------------------
+# Missingness flags
+# ---------------------------------------------------------------------------
+
+# null → respect per-feature include_missingness_flag setting in dictionary.py
+# true  → emit _missing flag for every feature
+# false → suppress all _missing flags
+missingness_flags_default: null
+
+# ---------------------------------------------------------------------------
+# Aggregation / window behaviour
+# ---------------------------------------------------------------------------
+
+# Step size in hours — must match STEP_HOURS in episode_models.py
+step_hours: 4
+
+# When true, measurements from chartevents are sorted by charttime before
+# LAST aggregation.  Disable only for debugging.
+sort_before_last_agg: true
+
+# ---------------------------------------------------------------------------
+# Imputation policy
+# ---------------------------------------------------------------------------
+
+imputation:
+  # Primary strategy for time-series features: forward-fill from prior step.
+  # Falls back to median_train when no prior value exists in the episode.
+  forward_fill_enabled: true
+
+  # Median fallback is computed on the train split only (leakage-safe).
+  # Path is written by the Phase 4 Plan 02 normalisation step.
+  train_medians_path: "data/processed/features/train_medians.json"
+
+  # When true, a warning is logged for every feature that falls back to
+  # normal_value (no prior and no train median available).
+  warn_on_normal_value_fallback: true
+
+# ---------------------------------------------------------------------------
+# Clipping policy
+# ---------------------------------------------------------------------------
+
+clipping:
+  # When true, hard clips defined in FeatureSpec (clip_low / clip_high)
+  # are applied after aggregation and before normalisation.
+  enabled: true
+
+  # Log a debug message whenever a value is clipped.
+  log_clip_events: false
+
+# ---------------------------------------------------------------------------
+# Derived features
+# ---------------------------------------------------------------------------
+
+derived:
+  # PaO2 / FiO2 ratio — requires pao2 and fio2_vent to be present.
+  pf_ratio:
+    enabled: true
+    # Minimum FiO2 value to use as denominator (avoids division by near-zero).
+    min_fio2: 0.21
+
+  # Shock index — requires heart_rate and sbp.
+  shock_index:
+    enabled: true
+    # Minimum SBP to use as denominator.
+    min_sbp: 1.0
+
+  # Temporal position feature (hours since onset) — always enabled.
+  hours_since_onset:
+    enabled: true
+
+# ---------------------------------------------------------------------------
+# Treatment (state signal) features
+# ---------------------------------------------------------------------------
+
+treatments:
+  # Vasopressor dose normalisation factor mapping agent → noradrenaline equivalent.
+  # Source: standard clinical equivalence tables.
+  vasopressor_equivalence:
+    norepinephrine:  1.0    # reference agent
+    epinephrine:     1.0    # 1:1 equivalence
+    dopamine:        0.01   # 1 µg/kg/min dopamine ≈ 0.01 µg/kg/min NE equiv
+    phenylephrine:   0.15   # approximate equivalence
+
+  # Fluid item IDs are grouped into these clinical categories.
+  # Used for audit / breakdown tables; does not affect aggregation.
+  fluid_categories:
+    crystalloid:
+      - 220949   # NS 0.9%
+      - 220950   # D5W
+      - 225158   # NS bolus
+      - 225159   # Half NS
+      - 225161   # D5 half NS
+      - 225168   # Lactated Ringers
+      - 220952   # D5NS
+      - 220955   # D5 0.45%
+    colloid:
+      - 225828   # Albumin 5%
+      - 225823   # Albumin 25%
+      - 225825   # Dextran 40
+      - 226089   # Hetastarch
+
+# ---------------------------------------------------------------------------
+# Output artefacts
+# ---------------------------------------------------------------------------
+
+output:
+  # Directory where extracted state Parquet files are written.
+  state_table_dir: "data/processed/features/state_vectors"
+
+  # Whether to write a per-episode audit CSV alongside the state table.
+  write_audit_csv: true
+
+  # Parquet compression codec.
+  parquet_compression: "snappy"
