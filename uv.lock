@@ -1750,7 +1750,7 @@ wheels = [
 [[package]]
 name = "mimic-sepsis"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "d3rlpy" },
     { name = "hydra-core" },
