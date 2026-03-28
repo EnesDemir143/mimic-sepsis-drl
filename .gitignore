@@ -36,6 +36,8 @@ wheels/
 # Icon must end with two \r
 Icon
 
+.agent
+
 
 # Thumbnails
 ._*
