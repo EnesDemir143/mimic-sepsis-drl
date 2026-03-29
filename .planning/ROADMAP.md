@@ -126,8 +126,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Build shared CPU/MPS/CUDA runtime abstraction and configs
-- [ ] 07-02: Implement the CQL training pipeline on the shared runtime layer
+- [x] 07-01: Build shared CPU/MPS/CUDA runtime abstraction and configs
+- [x] 07-02: Implement the CQL training pipeline on the shared runtime layer
 
 ### Phase 8: Comparative Offline RL Experiments
 **Goal**: Multiple offline RL algorithms can be compared fairly on the same MDP contract with complete run artifacts.
@@ -173,6 +173,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 4. State Representation Pipeline | 0/2 | Not started | - |
 | 5. Treatment and Reward Encoding | 0/2 | Not started | - |
 | 6. Transition Dataset and Baseline Benchmarks | 0/2 | Not started | - |
-| 7. CQL Reference Training | 0/2 | Not started | - |
+| 7. CQL Reference Training | 2/2 | ✅ Complete | 2026-03-29 |
 | 8. Comparative Offline RL Experiments | 0/2 | Not started | - |
 | 9. Evaluation, Safety, and Reproducible Package | 0/2 | Not started | - |
