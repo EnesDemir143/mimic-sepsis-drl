@@ -1,0 +1,85 @@
+{
+  "algorithm": "cql",
+  "epoch": 180,
+  "global_step": 99000,
+  "metrics": {
+    "td_loss_mean": 4.575773174545982,
+    "cql_loss_mean": 2.0186887428977274,
+    "total_loss_mean": 6.594461922212081
+  },
+  "config_dict": {
+    "algorithm": "cql",
+    "schema_version": "1.0.0",
+    "runtime": {
+      "requested_device": "auto",
+      "effective_device": "mps",
+      "torch_device_str": "mps",
+      "seed": 42,
+      "num_workers": 0,
+      "device_meta": {
+        "backend": "mps",
+        "requested_backend": "auto",
+        "torch_device_str": "mps",
+        "torch_version": "2.11.0",
+        "cuda_available": false,
+        "mps_available": true,
+        "mps_built": true,
+        "cuda_device_count": 0,
+        "cuda_device_name": null,
+        "python_version": "3.12.7",
+        "platform_system": "Darwin",
+        "platform_machine": "arm64",
+        "device_module_version": "1.0.0",
+        "fallback_applied": false,
+        "mps_fallback_ops_enabled": false
+      }
+    },
+    "checkpoint": {
+      "checkpoint_dir": "checkpoints/cql",
+      "save_every_n_epochs": 20,
+      "keep_last_n": 3
+    },
+    "logging": {
+      "log_dir": "runs/cql",
+      "experiment_name": "cql_reference",
+      "log_every_n_steps": 50
+    },
+    "dataset_path": "data/replay/replay_train.parquet",
+    "dataset_meta_path": "data/replay/replay_train_meta.json",
+    "n_epochs": 200,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "extra": {
+      "cql_alpha": 1.0,
+      "hidden_sizes": [
+        256,
+        256
+      ],
+      "lr": 0.0003,
+      "target_update_freq": 10,
+      "polyak_tau": 0.005,
+      "use_soft_update": false,
+      "grad_clip": 10.0,
+      "dry_run_state_dim": 33
+    }
+  },
+  "device_meta": {
+    "backend": "mps",
+    "requested_backend": "auto",
+    "torch_device_str": "mps",
+    "torch_version": "2.11.0",
+    "cuda_available": false,
+    "mps_available": true,
+    "mps_built": true,
+    "cuda_device_count": 0,
+    "cuda_device_name": null,
+    "python_version": "3.12.7",
+    "platform_system": "Darwin",
+    "platform_machine": "arm64",
+    "device_module_version": "1.0.0",
+    "fallback_applied": false,
+    "mps_fallback_ops_enabled": false
+  },
+  "timestamp": 1774803920.794951,
+  "module_version": "1.0.0"
+}
