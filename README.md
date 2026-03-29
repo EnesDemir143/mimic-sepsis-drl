@@ -1,5 +1,9 @@
 # MIMIC Sepsis Offline RL
 
+> Not: Bu repoyu çalıştırmadan önce ham MIMIC-IV dosyaları şu dizinde bulunmalıdır:
+> `data/raw/physionet.org/files/mimiciv/3.1`
+> Bu klasör yoksa veri pipeline'ı çalışmaz.
+
 ## TL;DR
 MIMIC-IV veri seti üzerinde, klinisyen tedavi yöntemleri ile Offline RL (Çevrimdışı Pekiştirmeli Öğrenme) modellerini (CQL, BCQ, IQL) değerlendiren; veri sızıntısına karşı yalıtılmış ve Sepsis-3 tabanlı şeffaf bir araştırma ve benchmark sistemidir.
 
@@ -25,22 +29,159 @@ Ana amaç; veri sızıntısını önleyen (data leakage protected), **klinik ola
 | **scikit-learn**      | Veri imputasyonu, scaling, ayırma | ✅ | Baseline performans algoritmaları |
 | **Hydra & MLflow**    | Deney takibi ve konfigürasyon (config) | ✅ | Yeniden üretilebilirlik güvencesi |
 
-## 🏁 Hızlı Başlangıç (Quick Reference)
+## 🏁 Çalıştırma Sırası
 
-Projeyi ayağa kaldırmak ve bağımlılıkları yönetmek için `uv` ekosistemini kullanabilirsiniz:
+Bu proje için temel kural şudur:
+
+- Ham veri önce `data/raw/physionet.org/files/mimiciv/3.1` altında hazır olmalı.
+- Sonra veri pipeline'ı sırayla çalıştırılmalı.
+- En sonda seçilen yöntem (`cql`, `bcq`, `iql`) eğitilmelidir.
+
+### 1. Ortamı hazırla
 
 ```bash
-# 1. Repoyu bilgisayarınıza alın
-git clone <repo-url>
-cd mimic-sepsis
-
-# 2. Sanal ortam (venv) yaratın ve aktif edin
-uv venv
-source .venv/bin/activate
-
-# 3. Temel bağımlılıkları ekleyin
 uv sync
 ```
+
+### 2. Kohortu üret
+
+```bash
+uv run python -m mimic_sepsis_rl.cli.build_cohort \
+  --config configs/cohort/default.yaml \
+  --emit-audit
+```
+
+Beklenen çıktı:
+
+- `data/processed/cohort/cohort.parquet`
+- `data/processed/cohort/excluded.parquet`
+- `data/processed/cohort/audit.json`
+
+### 3. Sepsis onset üret
+
+```bash
+uv run python -m mimic_sepsis_rl.data.onset \
+  --config configs/onset/default.yaml
+```
+
+Beklenen çıktı:
+
+- `data/processed/onset/onset_assignments.parquet`
+- `data/processed/onset/onset_candidates.parquet`
+- `data/processed/onset/unusable_episodes.parquet`
+- `data/processed/onset/onset_audit.json`
+
+### 4. Episode grid üret
+
+```bash
+uv run python -m mimic_sepsis_rl.cli.build_episode_grid
+```
+
+Beklenen çıktı:
+
+- `data/processed/episodes/episodes.parquet`
+- `data/processed/episodes/episode_steps.parquet`
+- `data/processed/episodes/grid_audit.json`
+
+### 5. Train / validation / test split üret
+
+```bash
+uv run python -m mimic_sepsis_rl.data.splits \
+  --config configs/splits/default.yaml \
+  --source-episode-set data/processed/episodes/episodes.parquet
+```
+
+Beklenen çıktı:
+
+- `data/splits/train_manifest.parquet`
+- `data/splits/validation_manifest.parquet`
+- `data/splits/test_manifest.parquet`
+- `data/splits/split_summary.json`
+
+### 6. State / action / reward / replay dataset üret
+
+```bash
+uv run python -m mimic_sepsis_rl.cli.build_transitions
+```
+
+Beklenen ana çıktılar:
+
+- `data/processed/features/state_vectors/state_table_raw.parquet`
+- `data/processed/features/state_vectors/state_table_normalized.parquet`
+- `data/processed/features/train_medians.json`
+- `data/processed/features/state_vectors/preprocessing_artifacts.json`
+- `data/processed/actions/action_bins.json`
+- `data/processed/actions/step_actions.parquet`
+- `data/processed/rewards/reward_config.json`
+- `data/processed/rewards/step_rewards.parquet`
+- `data/replay/replay_train.parquet`
+- `data/replay/replay_train_meta.json`
+- `data/replay/replay_validation.parquet`
+- `data/replay/replay_validation_meta.json`
+- `data/replay/replay_test.parquet`
+- `data/replay/replay_test_meta.json`
+
+### 7. Runtime doğrulaması yap
+
+```bash
+uv run python -m mimic_sepsis_rl.training.device --self-check
+```
+
+### 8. Eğitilecek yöntemi doğrula
+
+Burada sadece algoritma adı değişir:
+
+- `cql`
+- `bcq`
+- `iql`
+
+Örnek:
+
+```bash
+uv run python -m mimic_sepsis_rl.training.experiment_runner \
+  --algorithm cql \
+  --describe
+
+uv run python -m mimic_sepsis_rl.training.experiment_runner \
+  --algorithm cql \
+  --dry-run
+```
+
+### 9. Eğitimi başlat
+
+```bash
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql
+```
+
+BCQ veya IQL çalıştırmak için sadece algoritma parametresini değiştir:
+
+```bash
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm bcq
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm iql
+```
+
+### 10. Daha önce veri aşamalarını çalıştırdıysan
+
+Eğer sende şu dosyalar zaten varsa:
+
+- `data/processed/cohort/*`
+- `data/processed/onset/*`
+- `data/processed/episodes/*`
+- `data/splits/*`
+
+o zaman artık kalan minimum komutlar bunlar:
+
+```bash
+uv run python -m mimic_sepsis_rl.cli.build_transitions
+
+uv run python -m mimic_sepsis_rl.training.device --self-check
+
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql --describe
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql --dry-run
+uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql
+```
+
+BCQ veya IQL için son üç komutta sadece `--algorithm` değeri değişir.
 
 ⚠️ **MIMIC-IV Kullanımı Hakkında:** Orijinal hasta kayıtları üzerinde analiz apmak için **PhysioNet** kapsamında CITI sertifikası ve onaylı bir erişim yetkinliğine sahip olmanız gerekmektedir. Proje açık kaynaklı veri analitiği altyapısını içerir, hasta verisi barındırmaz.
 
