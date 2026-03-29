@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Klinik olarak makul, veri sizintisina dayanikli ve yeniden uretilebilir bir offline RL benchmark'i olusturmak.
-**Current focus:** Phase 8 - Comparative Offline RL Experiments
+**Current focus:** Phase 9 - Evaluation, Safety, and Reproducible Package
 
 ## Current Position
 
-Phase: 8 of 9 (Comparative Offline RL Experiments)
+Phase: 9 of 9 (Evaluation, Safety, and Reproducible Package)
 Plan: 1 of 2 in current phase
-Status: 08-02 ready to execute
-Last activity: 2026-03-29 - Phase 8 plan 08-01 completed
+Status: 09-01 ready to execute
+Last activity: 2026-03-29 - Phase 8 plan 08-02 completed
 
-Progress: [███████░░░] 78% (7 of 9 phases complete)
+Progress: [████████░░] 89% (8 of 9 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3 (Phases 7-8)
-- Average duration: ~50 min/plan (estimated)
-- Total execution time: ~2.5 hours (estimated)
+- Total plans completed: 4 (Phases 7-8)
+- Average duration: ~44 min/plan (estimated)
+- Total execution time: ~3.0 hours (estimated)
 
 **By Phase:**
 
@@ -34,11 +34,11 @@ Progress: [███████░░░] 78% (7 of 9 phases complete)
 | 5 | 0 | 2 | - |
 | 6 | 0 | 2 | - |
 | 7 | 2 | 2 | ~60 min |
-| 8 | 1 | 2 | ~30 min |
+| 8 | 2 | 2 | ~28 min |
 | 9 | 0 | 2 | - |
 
 **Recent Trend:**
-- Last 5 plans: 07-01, 07-02, 08-01
+- Last 5 plans: 07-01, 07-02, 08-01, 08-02
 - Trend: Active
 
 ## Accumulated Context
@@ -55,6 +55,8 @@ Recent decisions affecting current work:
 - Custom PyTorch chosen over d3rlpy for trainer implementation — provides full MPS/CUDA portability without hidden fallback risks.
 - CQL is the reference algorithm; Phase 8 BCQ/IQL reuse `common.py`, `device.py`, and `TrainingConfig` without modification.
 - Synthetic dry-run tensors must be generated on CPU then moved to device — MPS does not accept a CPU-pinned Generator directly.
+- BCQ and IQL now emit the same checkpoint-manifest and JSONL curve envelope as CQL, so comparison tooling can stay algorithm-agnostic.
+- Comparison reports should normalize run artifacts from disk and flag dataset-contract drift instead of silently merging incompatible runs.
 
 ### Phase 7 Completion Summary
 
@@ -79,20 +81,26 @@ Recent decisions affecting current work:
 - `configs/training/bcq.yaml` / `iql.yaml` — baseline configs on the frozen CQL data contract
 - 9 tests passing (`tests/training/test_algorithm_registry.py`)
 
+**Plan 08-02 — BCQ/IQL Training and Comparison Artifacts (RL-02, RL-03 ✅)**
+- `src/mimic_sepsis_rl/training/bcq.py` — BCQ trainer, dry-run, and policy surface on the shared replay contract
+- `src/mimic_sepsis_rl/training/iql.py` — IQL trainer, expectile/value/actor stack, and shared artifact emission
+- `src/mimic_sepsis_rl/training/comparison.py` — normalized run artifacts and cross-algorithm comparison reports
+- `docs/model_comparison.md` — comparison artifact contract and interpretation guide
+- 13 tests passing across registry/comparison coverage (`tests/training/test_algorithm_registry.py`, `tests/training/test_comparison_runs.py`)
+
 ### Pending Todos
 
-- Phase 8: BCQ/IQL trainers should reuse `common.py` utilities and `TrainingConfig` without modification.
-- Phase 8: Implement `bcq.py`, `iql.py`, and comparison artifacts on top of the shared runner from 08-01.
+- Phase 9: Implement OPE metrics, safety checks, and evaluation packaging on top of the standardized Phase 8 run artifacts.
 - Phases 1–6: Planning artifacts exist but implementation summaries are partially missing from STATE tracking.
 
 ### Blockers/Concerns
 
 - Sepsis-3 onset operationalization still needs schema-level clarification during Phase 1 and Phase 2 execution.
-- Phase 8 must reuse the CQL device abstraction and dataset contract — no forking allowed.
 - OPE, safety overlays, and ablations remain deferred to Phase 9.
+- Full BCQ/IQL training still requires the Phase 6 replay dataset artifacts to exist locally; current verification used shared dry-runs and artifact-schema tests.
 
 ## Session Continuity
 
-Last session: 2026-03-29 16:24 +03
-Stopped at: Phase 8 plan 08-01 complete; 08-02 ready to execute
+Last session: 2026-03-29 16:45 +03
+Stopped at: Phase 8 complete; Phase 9 plan 09-01 ready to execute
 Resume file: None
