@@ -1,0 +1,37 @@
+# Apple Silicon MPS Runtime Configuration
+# ---------------------------------------------------------------------------
+# Use this config when training on Apple Silicon (M1/M2/M3/M4) hardware.
+# The MPS backend accelerates PyTorch operations via Metal Performance Shaders.
+#
+# Usage:
+#   python -m mimic_sepsis_rl.training.cql \
+#       --config configs/training/cql.yaml \
+#       --runtime configs/training/runtime.mps.yaml
+#
+# If any operation is not supported by MPS, set the environment variable:
+#   PYTORCH_ENABLE_MPS_FALLBACK=1
+# This allows unsupported ops to fall back to CPU automatically.
+# ---------------------------------------------------------------------------
+
+runtime:
+  # Target accelerator backend.
+  # Accepted values: auto | mps | cuda | cpu
+  # "mps" will raise a warning and fall back to CPU if MPS is unavailable.
+  device: mps
+
+  # Global random seed for reproducible training runs.
+  # Must match the seed used when building split manifests and action bins.
+  seed: 42
+
+  # DataLoader worker processes.
+  # 0 = load data in the main process (recommended for MPS to avoid
+  # multiprocessing/Metal contention on some macOS versions).
+  num_workers: 0
+
+  # MPS-specific notes:
+  # - torch.backends.mps.is_available() must return True at runtime.
+  # - Set PYTORCH_ENABLE_MPS_FALLBACK=1 in your shell if you encounter
+  #   "not implemented for MPS" errors during training.
+  # - Mixed precision (torch.float16) on MPS may require PyTorch >= 2.1.
+  # - Validate MPS op support before a full training run:
+  #     python -m mimic_sepsis_rl.training.device --self-check --device mps

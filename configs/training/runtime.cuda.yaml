@@ -1,0 +1,53 @@
+# NVIDIA CUDA Runtime Configuration
+# ---------------------------------------------------------------------------
+# Backend-specific runtime settings for NVIDIA GPU training.
+# Pass this file via --runtime-config or merge it with an algorithm config.
+#
+# Requirement: PLAT-01 (cross-platform device abstraction)
+# ---------------------------------------------------------------------------
+
+runtime:
+  # Explicit CUDA selection — training will fail fast if CUDA is unavailable.
+  # Use runtime.auto.yaml (or device: auto) to allow graceful fallback.
+  device: cuda
+
+  # Global random seed for reproducibility across runs.
+  seed: 42
+
+  # DataLoader worker processes.  Set to 0 for single-process loading.
+  # Increase on multi-core CUDA hosts to overlap data transfer with compute.
+  num_workers: 4
+
+  # CUDA-specific tuning
+  cuda:
+    # Allow TF32 for matrix multiplications (Ampere+ GPUs).
+    # Trades a small amount of precision for ~2–3x throughput on supported
+    # hardware.  Disable for bit-exact reproducibility.
+    allow_tf32: true
+
+    # Use cuDNN benchmark mode to auto-select fastest convolution algorithms.
+    # Disable if input sizes vary across batches (causes re-benchmarking).
+    cudnn_benchmark: false
+
+    # Deterministic cuDNN ops (slower but fully reproducible).
+    cudnn_deterministic: true
+
+    # Pin host memory for faster CPU→GPU transfers in DataLoader.
+    pin_memory: true
+
+# Checkpoint persistence
+checkpoint:
+  checkpoint_dir: "checkpoints/cuda"
+  save_every_n_epochs: 10
+  keep_last_n: 3
+
+# Experiment logging
+logging:
+  log_dir: "runs/cuda"
+  experiment_name: "mimic_rl_cuda"
+  log_every_n_steps: 50
+
+# ---------------------------------------------------------------------------
+# Schema version — must match mimic_sepsis_rl.training.config.CONFIG_SCHEMA_VERSION
+# ---------------------------------------------------------------------------
+schema_version: "1.0.0"
