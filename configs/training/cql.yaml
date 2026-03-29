@@ -1,0 +1,129 @@
+# CQL Reference Training Configuration
+# ---------------------------------------------------------------------------
+# Conservative Q-Learning (CQL) training configuration for the MIMIC Sepsis
+# offline RL pipeline.
+#
+# Requirements: RL-01, PLAT-01
+# Phase: 07-cql-reference-training
+#
+# Usage:
+#   python -m mimic_sepsis_rl.training.cql --config configs/training/cql.yaml
+#   python -m mimic_sepsis_rl.training.cql --config configs/training/cql.yaml --dry-run
+#
+# To override the device at runtime:
+#   python -m mimic_sepsis_rl.training.cql --config configs/training/cql.yaml --device mps
+# ---------------------------------------------------------------------------
+
+# Algorithm identifier — must match what trainers and registries expect.
+algorithm: cql
+
+# Config schema version — must match mimic_sepsis_rl.training.config.CONFIG_SCHEMA_VERSION
+schema_version: "1.0.0"
+
+# ---------------------------------------------------------------------------
+# Runtime / device
+# ---------------------------------------------------------------------------
+runtime:
+  # Device selection: auto | mps | cuda | cpu
+  # "auto" prefers CUDA, then MPS, then CPU.
+  # Override per-machine via --device flag or MIMIC_RL_DEVICE env var.
+  device: auto
+
+  # Global random seed. Must be fixed for reproducible training runs.
+  # This seed is used for:
+  #   - dataset batch shuffling
+  #   - network weight initialisation
+  #   - Python / NumPy / PyTorch RNGs
+  seed: 42
+
+  # DataLoader worker processes.
+  # 0 = load data in the main process.
+  # Increase on multi-core hosts; keep at 0 for MPS (Metal/macOS).
+  num_workers: 0
+
+# ---------------------------------------------------------------------------
+# Dataset
+# ---------------------------------------------------------------------------
+# Path to the replay-buffer Parquet file produced by Phase 6.
+# This must reference the TRAIN split only — validation and test splits
+# are never used during training.
+dataset_path: "data/replay/replay_train.parquet"
+
+# Optional: path to the companion JSON metadata file for provenance checks.
+dataset_meta_path: "data/replay/replay_train_meta.json"
+
+# ---------------------------------------------------------------------------
+# Training loop
+# ---------------------------------------------------------------------------
+# Total number of training epochs (one epoch = one full pass over the dataset).
+n_epochs: 200
+
+# Mini-batch size for gradient updates.
+batch_size: 256
+
+# MDP discount factor γ.  Values close to 1.0 weight long-term outcomes
+# more heavily.  0.99 is a standard choice for episodic medical RL tasks.
+gamma: 0.99
+
+# ---------------------------------------------------------------------------
+# CQL-specific hyper-parameters (passed through the "extra" block)
+# ---------------------------------------------------------------------------
+
+# CQL regularisation coefficient α.
+# Higher α → more conservative Q-values → policy stays closer to the
+# behaviour (clinician) policy.  Lower α → less conservatism.
+# Typical range: [0.1, 10.0].  Start with 1.0 and tune via OPE (Phase 9).
+cql_alpha: 1.0
+
+# Q-network hidden layer widths.
+# Each entry is one hidden layer; activation is ReLU.
+hidden_sizes: [256, 256]
+
+# Adam optimiser learning rate.
+lr: 0.0003
+
+# Hard target-network update frequency (in epochs).
+# The target Q-network is copied from the online network every N epochs.
+# Ignored when use_soft_update: true.
+target_update_freq: 10
+
+# Soft (Polyak) target update coefficient τ.
+# target ← (1-τ) * target + τ * online.
+# Only used when use_soft_update: true.
+polyak_tau: 0.005
+
+# Set to true to use soft target updates every step instead of hard updates.
+use_soft_update: false
+
+# Gradient clipping maximum norm (0 = disabled).
+grad_clip: 10.0
+
+# Synthetic state dimension used during --dry-run (no real data loaded).
+# Should match the actual state_dim once the Phase 4 pipeline is frozen.
+dry_run_state_dim: 33
+
+# ---------------------------------------------------------------------------
+# Checkpoint persistence
+# ---------------------------------------------------------------------------
+checkpoint:
+  # Directory where model checkpoints and manifests are written.
+  checkpoint_dir: "checkpoints/cql"
+
+  # Save a checkpoint every N epochs (0 = only at the final epoch).
+  save_every_n_epochs: 20
+
+  # Number of recent checkpoints to retain on disk (0 = keep all).
+  keep_last_n: 3
+
+# ---------------------------------------------------------------------------
+# Experiment logging
+# ---------------------------------------------------------------------------
+logging:
+  # Root directory for run logs and metric curves.
+  log_dir: "runs/cql"
+
+  # Human-readable experiment name used in log file paths.
+  experiment_name: "cql_reference"
+
+  # Emit scalar metrics to the JSONL log every N gradient steps.
+  log_every_n_steps: 50
