@@ -178,19 +178,48 @@ def _run_cql_experiment(
     return trainer.train().to_dict()
 
 
-def _make_pending_handler(name: str) -> AlgorithmHandler:
-    """Create a placeholder handler for future algorithm modules."""
+def _run_bcq_experiment(
+    cfg: TrainingConfig,
+    request: AlgorithmRunRequest,
+) -> dict[str, Any]:
+    """Execute the BCQ adapter behind the shared registry surface."""
+    from mimic_sepsis_rl.training.bcq import BCQTrainer, _dry_run
 
-    def _pending_handler(
-        cfg: TrainingConfig,
-        request: AlgorithmRunRequest,
-    ) -> dict[str, Any]:
-        raise NotImplementedError(
-            f"Algorithm '{name}' is registered on the shared experiment surface, "
-            "but its trainer module is scheduled for Phase 08-02."
-        )
+    n_actions = request.n_actions or DEFAULT_ACTION_COUNT
+    if request.dry_run:
+        _dry_run(cfg, n_actions=n_actions)
+        return {
+            "algorithm": "bcq",
+            "mode": "dry_run",
+            "device_backend": cfg.device_meta.backend,
+            "n_actions": n_actions,
+        }
 
-    return _pending_handler
+    dataset = load_replay_dataset(cfg)
+    trainer = BCQTrainer(cfg, dataset, n_actions=n_actions)
+    return trainer.train().to_dict()
+
+
+def _run_iql_experiment(
+    cfg: TrainingConfig,
+    request: AlgorithmRunRequest,
+) -> dict[str, Any]:
+    """Execute the IQL adapter behind the shared registry surface."""
+    from mimic_sepsis_rl.training.iql import IQLTrainer, _dry_run
+
+    n_actions = request.n_actions or DEFAULT_ACTION_COUNT
+    if request.dry_run:
+        _dry_run(cfg, n_actions=n_actions)
+        return {
+            "algorithm": "iql",
+            "mode": "dry_run",
+            "device_backend": cfg.device_meta.backend,
+            "n_actions": n_actions,
+        }
+
+    dataset = load_replay_dataset(cfg)
+    trainer = IQLTrainer(cfg, dataset, n_actions=n_actions)
+    return trainer.train().to_dict()
 
 
 def build_default_registry() -> AlgorithmRegistry:
@@ -204,8 +233,7 @@ def build_default_registry() -> AlgorithmRegistry:
                 description="Batch-Constrained Q-learning on the shared replay contract.",
                 default_config_path=config_dir / "bcq.yaml",
                 module_path="mimic_sepsis_rl.training.bcq",
-                handler=_make_pending_handler("bcq"),
-                is_available=False,
+                handler=_run_bcq_experiment,
             ),
             AlgorithmDefinition(
                 name="cql",
@@ -219,8 +247,7 @@ def build_default_registry() -> AlgorithmRegistry:
                 description="Implicit Q-Learning on the shared replay contract.",
                 default_config_path=config_dir / "iql.yaml",
                 module_path="mimic_sepsis_rl.training.iql",
-                handler=_make_pending_handler("iql"),
-                is_available=False,
+                handler=_run_iql_experiment,
             ),
         )
     )

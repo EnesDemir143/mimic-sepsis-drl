@@ -93,6 +93,7 @@ def test_default_registry_lists_all_phase8_algorithms() -> None:
     for algorithm in SUPPORTED_ALGORITHMS:
         definition = registry.require(algorithm)
         assert definition.default_config_path == CONFIG_DIR / f"{algorithm}.yaml"
+        assert definition.is_available
 
 
 @pytest.mark.parametrize("algorithm", SUPPORTED_ALGORITHMS)
@@ -153,17 +154,24 @@ def test_resolve_experiment_loads_shared_dataset_contract(tmp_path: Path) -> Non
     assert resolved.config.device.type == "cpu"
 
 
-def test_pending_algorithms_raise_clear_message(tmp_path: Path) -> None:
+@pytest.mark.parametrize("algorithm", ("bcq", "iql"))
+def test_algorithms_execute_dry_run_through_shared_runner(
+    tmp_path: Path,
+    algorithm: str,
+) -> None:
     dataset_meta_path = _write_dataset_meta(tmp_path)
     config_path = _write_temp_config(
         tmp_path,
-        algorithm="iql",
+        algorithm=algorithm,
         dataset_meta_path=dataset_meta_path,
     )
-    resolved = resolve_experiment("iql", config_path=config_path, device="cpu")
+    resolved = resolve_experiment(algorithm, config_path=config_path, device="cpu")
 
-    with pytest.raises(NotImplementedError, match="Phase 08-02"):
-        resolved.execute(dry_run=True)
+    result = resolved.execute(dry_run=True)
+
+    assert result["algorithm"] == algorithm
+    assert result["mode"] == "dry_run"
+    assert result["device_backend"] == "cpu"
 
 
 def test_list_algorithms_cli_mentions_all_registry_entries(

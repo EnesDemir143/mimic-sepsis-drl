@@ -10,6 +10,9 @@ Public surface
 - :mod:`mimic_sepsis_rl.training.config`  – Training config resolution
 - :mod:`mimic_sepsis_rl.training.common`  – Shared training helpers
 - :mod:`mimic_sepsis_rl.training.cql`     – Discrete CQL reference trainer
+- :mod:`mimic_sepsis_rl.training.bcq`     – Discrete BCQ trainer
+- :mod:`mimic_sepsis_rl.training.iql`     – Discrete IQL trainer
+- :mod:`mimic_sepsis_rl.training.comparison` – Shared comparison artifacts
 """
 
 __all__ = [
@@ -17,4 +20,7 @@ __all__ = [
     "config",
     "common",
     "cql",
+    "bcq",
+    "iql",
+    "comparison",
 ]
