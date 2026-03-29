@@ -1,0 +1,46 @@
+# BCQ Baseline Training Configuration
+# ---------------------------------------------------------------------------
+# Batch-Constrained Q-learning configuration routed through the shared
+# experiment runner introduced in Phase 8.
+#
+# Usage:
+#   python -m mimic_sepsis_rl.training.experiment_runner --algorithm bcq --describe
+# ---------------------------------------------------------------------------
+
+algorithm: bcq
+schema_version: "1.0.0"
+
+runtime:
+  device: auto
+  seed: 42
+  num_workers: 0
+
+dataset_path: "data/replay/replay_train.parquet"
+dataset_meta_path: "data/replay/replay_train_meta.json"
+
+n_epochs: 200
+batch_size: 256
+gamma: 0.99
+
+# ---------------------------------------------------------------------------
+# BCQ-specific baseline hyper-parameters
+# ---------------------------------------------------------------------------
+hidden_sizes: [256, 256]
+actor_lr: 0.0001
+critic_lr: 0.0003
+polyak_tau: 0.005
+target_update_freq: 10
+imitation_threshold: 0.3
+behavior_cloning_weight: 1.0
+grad_clip: 10.0
+dry_run_state_dim: 33
+
+checkpoint:
+  checkpoint_dir: "checkpoints/bcq"
+  save_every_n_epochs: 20
+  keep_last_n: 3
+
+logging:
+  log_dir: "runs/bcq"
+  experiment_name: "bcq_baseline"
+  log_every_n_steps: 50
