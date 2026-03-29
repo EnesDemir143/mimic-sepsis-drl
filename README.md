@@ -4,6 +4,27 @@
 > `data/raw/physionet.org/files/mimiciv/3.1`
 > Bu klasör yoksa veri pipeline'ı çalışmaz.
 
+## Run Reports
+
+| Run | Report | Metrics | Final manifest | Visuals |
+|---|---|---|---|---|
+| CQL latest run | [docs/cql_run_report.md](docs/cql_run_report.md) | [runs/cql/cql_reference_metrics.jsonl](runs/cql/cql_reference_metrics.jsonl) | [checkpoints/cql/cql_epoch0200_step0110000_manifest.json](checkpoints/cql/cql_epoch0200_step0110000_manifest.json) | [docs/assets/cql-run](docs/assets/cql-run) |
+
+## Docs Index
+
+| Category | Document | Link |
+|---|---|---|
+| Cohort | Cohort selection rules | [docs/cohort_selection.md](docs/cohort_selection.md) |
+| Features | Feature dictionary | [docs/feature_dictionary.md](docs/feature_dictionary.md) |
+| Actions | Action mapping and discretization | [docs/action_mapping.md](docs/action_mapping.md) |
+| Rewards | Reward specification | [docs/reward_spec.md](docs/reward_spec.md) |
+| Training | CQL training reference | [docs/cql_training.md](docs/cql_training.md) |
+| Benchmarks | Baseline benchmarks | [docs/baseline_benchmarks.md](docs/baseline_benchmarks.md) |
+| Evaluation | Evaluation protocol | [docs/evaluation_protocol.md](docs/evaluation_protocol.md) |
+| Comparison | Model comparison envelope | [docs/model_comparison.md](docs/model_comparison.md) |
+| Reproducibility | Reproducibility guide | [docs/reproducibility.md](docs/reproducibility.md) |
+| Safety | Leakage boundaries | [docs/leakage_boundaries.md](docs/leakage_boundaries.md) |
+
 ## TL;DR
 MIMIC-IV veri seti üzerinde, klinisyen tedavi yöntemleri ile Offline RL (Çevrimdışı Pekiştirmeli Öğrenme) modellerini (CQL, BCQ, IQL) değerlendiren; veri sızıntısına karşı yalıtılmış ve Sepsis-3 tabanlı şeffaf bir araştırma ve benchmark sistemidir.
 
