@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 Phase: 8 of 9 (Comparative Offline RL Experiments)
-Plan: 0 of 2 in current phase
-Status: Ready to execute
-Last activity: 2026-03-29 - Phase 7 CQL Reference Training completed (2/2 plans)
+Plan: 1 of 2 in current phase
+Status: 08-02 ready to execute
+Last activity: 2026-03-29 - Phase 8 plan 08-01 completed
 
 Progress: [███████░░░] 78% (7 of 9 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (Phase 7)
-- Average duration: ~60 min/plan (estimated)
-- Total execution time: ~2.0 hours (Phase 7)
+- Total plans completed: 3 (Phases 7-8)
+- Average duration: ~50 min/plan (estimated)
+- Total execution time: ~2.5 hours (estimated)
 
 **By Phase:**
 
@@ -34,11 +34,11 @@ Progress: [███████░░░] 78% (7 of 9 phases complete)
 | 5 | 0 | 2 | - |
 | 6 | 0 | 2 | - |
 | 7 | 2 | 2 | ~60 min |
-| 8 | 0 | 2 | - |
+| 8 | 1 | 2 | ~30 min |
 | 9 | 0 | 2 | - |
 
 **Recent Trend:**
-- Last 5 plans: 07-01, 07-02
+- Last 5 plans: 07-01, 07-02, 08-01
 - Trend: Active
 
 ## Accumulated Context
@@ -71,10 +71,18 @@ Recent decisions affecting current work:
 - `docs/cql_training.md`
 - 64 tests passing (`tests/training/test_cql_pipeline.py`)
 
+### Phase 8 Progress
+
+**Plan 08-01 — Shared Algorithm Registry and Experiment Runner (RL-02 partial ✅)**
+- `src/mimic_sepsis_rl/training/registry.py` — `AlgorithmRegistry`, shared config resolution, CQL adapter, BCQ/IQL placeholders
+- `src/mimic_sepsis_rl/training/experiment_runner.py` — `resolve_experiment()`, `DatasetContractSummary`, shared CLI entrypoint
+- `configs/training/bcq.yaml` / `iql.yaml` — baseline configs on the frozen CQL data contract
+- 9 tests passing (`tests/training/test_algorithm_registry.py`)
+
 ### Pending Todos
 
 - Phase 8: BCQ/IQL trainers should reuse `common.py` utilities and `TrainingConfig` without modification.
-- Phase 8: Algorithm registry and experiment runner needed before individual BCQ/IQL implementations.
+- Phase 8: Implement `bcq.py`, `iql.py`, and comparison artifacts on top of the shared runner from 08-01.
 - Phases 1–6: Planning artifacts exist but implementation summaries are partially missing from STATE tracking.
 
 ### Blockers/Concerns
@@ -85,6 +93,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-29 15:43 +03
-Stopped at: Phase 7 complete (2/2 plans); all commits on main; Phase 8 ready to execute
+Last session: 2026-03-29 16:24 +03
+Stopped at: Phase 8 plan 08-01 complete; 08-02 ready to execute
 Resume file: None

@@ -141,7 +141,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: Create the shared algorithm registry and experiment runner
+- [x] 08-01: Create the shared algorithm registry and experiment runner
 - [ ] 08-02: Implement BCQ/IQL training and standardized comparison artifacts
 
 ### Phase 9: Evaluation, Safety, and Reproducible Package
@@ -174,5 +174,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 5. Treatment and Reward Encoding | 0/2 | Not started | - |
 | 6. Transition Dataset and Baseline Benchmarks | 0/2 | Not started | - |
 | 7. CQL Reference Training | 2/2 | ✅ Complete | 2026-03-29 |
-| 8. Comparative Offline RL Experiments | 0/2 | Not started | - |
+| 8. Comparative Offline RL Experiments | 1/2 | In progress | - |
 | 9. Evaluation, Safety, and Reproducible Package | 0/2 | Not started | - |
