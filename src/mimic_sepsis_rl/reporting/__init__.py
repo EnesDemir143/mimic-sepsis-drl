@@ -1,5 +1,10 @@
 """Reporting surfaces for reproducible research packaging."""
 
+from mimic_sepsis_rl.reporting.offline_rl import (
+    ReportArtifactIndex,
+    generate_training_report_artifacts,
+    write_evaluation_report_artifacts,
+)
 from mimic_sepsis_rl.reporting.package import (
     BackendMetadataRecord,
     BundleArtifactRecord,
@@ -18,6 +23,9 @@ from mimic_sepsis_rl.reporting.package import (
 )
 
 __all__ = [
+    "ReportArtifactIndex",
+    "generate_training_report_artifacts",
+    "write_evaluation_report_artifacts",
     "BackendMetadataRecord",
     "BundleArtifactRecord",
     "EvaluationSummaryRecord",

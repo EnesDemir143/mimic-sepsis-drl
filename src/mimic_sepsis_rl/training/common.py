@@ -35,8 +35,10 @@ import math
 import random
 import time
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterator, Sequence
+from typing import Any, Iterator, Mapping, Sequence
+from zoneinfo import ZoneInfo
 
 import polars as pl
 import torch
@@ -46,6 +48,7 @@ from mimic_sepsis_rl.training.config import TrainingConfig
 logger = logging.getLogger(__name__)
 
 COMMON_MODULE_VERSION: str = "1.0.0"
+LOG_TIMEZONE_NAME: str = "Europe/Istanbul"
 
 # ---------------------------------------------------------------------------
 # Reproducibility
@@ -648,6 +651,68 @@ class MetricLogger:
         )
 
 
+def _timestamped_now() -> str:
+    """Return an ISO 8601 timestamp in the project default timezone."""
+    return datetime.now(ZoneInfo(LOG_TIMEZONE_NAME)).isoformat(timespec="seconds")
+
+
+class EventLogger:
+    """Append structured single-line events to a timestamped `.log` file."""
+
+    def __init__(self, log_path: Path) -> None:
+        self._log_path = log_path
+        self._log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def log_path(self) -> Path:
+        """Return the backing log file path."""
+        return self._log_path
+
+    def log_event(
+        self,
+        *,
+        level: str,
+        component: str,
+        event: str,
+        payload: Mapping[str, Any] | str | None = None,
+    ) -> None:
+        """Write one append-only event line.
+
+        Parameters
+        ----------
+        level:
+            Human-readable severity level such as ``INFO`` or ``WARNING``.
+        component:
+            Component name producing the event.
+        event:
+            Short event identifier.
+        payload:
+            Optional JSON-serialisable payload or free-form message.
+        """
+        timestamp = _timestamped_now()
+        if payload is None:
+            payload_text = "{}"
+        elif isinstance(payload, str):
+            payload_text = payload.replace("\n", "\\n")
+        else:
+            payload_text = json.dumps(payload, ensure_ascii=True, sort_keys=True)
+
+        line = f"{timestamp} {level.upper()} {component} {event} {payload_text}\n"
+        with self._log_path.open("a", encoding="utf-8") as handle:
+            handle.write(line)
+
+    @classmethod
+    def from_config(
+        cls,
+        cfg: TrainingConfig,
+        *,
+        filename: str,
+    ) -> "EventLogger":
+        """Build an event logger under the experiment-specific artifact folder."""
+        artifact_dir = cfg.logging.log_dir / cfg.logging.experiment_name
+        return cls(artifact_dir / filename)
+
+
 # ---------------------------------------------------------------------------
 # Training loop utilities
 # ---------------------------------------------------------------------------
@@ -712,12 +777,14 @@ def compute_epoch_metrics(
 
 __all__ = [
     "COMMON_MODULE_VERSION",
+    "LOG_TIMEZONE_NAME",
     "TransitionBatch",
     "ReplayDataset",
     "CheckpointManifest",
     "CheckpointManager",
     "ScalarMetric",
     "MetricLogger",
+    "EventLogger",
     "set_global_seed",
     "load_replay_dataset",
     "build_checkpoint_manager",
