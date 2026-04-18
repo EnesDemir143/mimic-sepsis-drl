@@ -665,6 +665,18 @@ class TestCQLTrainer:
         log_files = list((tmp_path / "runs").rglob("*.jsonl"))
         assert len(log_files) >= 1
 
+    def test_training_generates_reporting_artifacts(self, tmp_path) -> None:
+        cfg = _make_cpu_config(tmp_path, n_epochs=1)
+        dataset = ReplayDataset(cfg.dataset_path, device=cfg.device)
+        trainer = CQLTrainer(cfg, dataset, n_actions=N_ACTIONS)
+        result = trainer.train()
+        artifact_dir = tmp_path / "runs" / "test_cql"
+        assert result.report_artifacts is not None
+        assert artifact_dir.exists()
+        assert (artifact_dir / "run_manifest.json").exists()
+        assert (artifact_dir / "training.log").exists()
+        assert (artifact_dir / "runtime_summary.json").exists()
+
     def test_result_to_dict_keys(self, tmp_path) -> None:
         cfg = _make_cpu_config(tmp_path, n_epochs=1)
         dataset = ReplayDataset(cfg.dataset_path, device=cfg.device)
