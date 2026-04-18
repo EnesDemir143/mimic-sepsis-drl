@@ -53,6 +53,7 @@ import torch.nn.functional as F
 
 from mimic_sepsis_rl.training.common import (
     CheckpointManager,
+    EventLogger,
     MetricLogger,
     ReplayDataset,
     TransitionBatch,
@@ -68,6 +69,7 @@ from mimic_sepsis_rl.training.config import (
     load_training_config,
 )
 from mimic_sepsis_rl.training.device import resolve_device, validate_mps_ops
+from mimic_sepsis_rl.reporting.offline_rl import generate_training_report_artifacts
 
 logger = logging.getLogger(__name__)
 
@@ -266,6 +268,7 @@ class CQLTrainingResult:
     state_dim: int
     n_actions: int
     device_backend: str
+    report_artifacts: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         d = {
@@ -283,6 +286,7 @@ class CQLTrainingResult:
             "state_dim": self.state_dim,
             "n_actions": self.n_actions,
             "device_backend": self.device_backend,
+            "report_artifacts": self.report_artifacts,
         }
         return d
 
@@ -413,6 +417,14 @@ class CQLTrainer:
         # Infra
         self._ckpt_mgr = build_checkpoint_manager(cfg)
         self._metric_logger = MetricLogger.from_config(cfg)
+        self._training_event_logger = EventLogger.from_config(
+            cfg,
+            filename="training.log",
+        )
+        self._runtime_event_logger = EventLogger.from_config(
+            cfg,
+            filename="runtime.log",
+        )
 
         self._global_step = 0
         self._start_time = 0.0
@@ -442,6 +454,9 @@ class CQLTrainer:
         self._q_net.train()
 
         q_values = self._q_net(batch.states)  # (B, n_actions)
+        q_data = q_values.gather(1, batch.actions.unsqueeze(1)).squeeze(1)
+        q_max = q_values.max(dim=1).values
+        conservative_gap = (torch.logsumexp(q_values, dim=1) - q_data).mean()
         with torch.no_grad():
             next_q_values = self._target_net(batch.next_states)  # (B, n_actions)
 
@@ -469,6 +484,9 @@ class CQLTrainer:
             "td_loss": loss_td.item(),
             "cql_loss": loss_cql.item(),
             "total_loss": total_loss.item(),
+            "mean_q_dataset": q_data.mean().item(),
+            "mean_q_max": q_max.mean().item(),
+            "conservative_gap": conservative_gap.item(),
         }
 
     # ------------------------------------------------------------------
@@ -518,6 +536,23 @@ class CQLTrainer:
         td_losses: list[float] = []
         cql_losses: list[float] = []
         total_losses: list[float] = []
+        epoch_durations: list[float] = []
+
+        self._training_event_logger.log_event(
+            level="INFO",
+            component="trainer",
+            event="run_start",
+            payload={
+                "algorithm": cfg.algorithm,
+                "experiment_name": cfg.logging.experiment_name,
+                "seed": cfg.runtime.seed,
+                "device_backend": cfg.device_meta.backend,
+                "batch_size": cfg.batch_size,
+                "gamma": cfg.gamma,
+                "n_epochs": cfg.n_epochs,
+                "n_actions": self._n_actions,
+            },
+        )
 
         logger.info(
             "Starting CQL training: epochs=%d batch_size=%d gamma=%.3f alpha=%.3f",
@@ -528,6 +563,7 @@ class CQLTrainer:
         )
 
         for epoch in range(1, cfg.n_epochs + 1):
+            epoch_started_at = time.time()
             td_losses.clear()
             cql_losses.clear()
             total_losses.clear()
@@ -552,8 +588,28 @@ class CQLTrainer:
                     step=self._global_step,
                     epoch=epoch,
                 )
+                self._metric_logger.log_scalar(
+                    "mean_q_dataset",
+                    step_metrics["mean_q_dataset"],
+                    step=self._global_step,
+                    epoch=epoch,
+                )
+                self._metric_logger.log_scalar(
+                    "mean_q_max",
+                    step_metrics["mean_q_max"],
+                    step=self._global_step,
+                    epoch=epoch,
+                )
+                self._metric_logger.log_scalar(
+                    "conservative_gap",
+                    step_metrics["conservative_gap"],
+                    step=self._global_step,
+                    epoch=epoch,
+                )
 
             # Epoch summary
+            epoch_duration = time.time() - epoch_started_at
+            epoch_durations.append(epoch_duration)
             epoch_metrics = {
                 "td_loss_mean": sum(td_losses) / max(len(td_losses), 1),
                 "cql_loss_mean": sum(cql_losses) / max(len(cql_losses), 1),
@@ -564,6 +620,28 @@ class CQLTrainer:
             )
 
             self._maybe_update_target(epoch)
+
+            self._training_event_logger.log_event(
+                level="INFO",
+                component="trainer",
+                event="epoch_end",
+                payload={
+                    "epoch": epoch,
+                    "global_step": self._global_step,
+                    "metrics": epoch_metrics,
+                },
+            )
+            self._runtime_event_logger.log_event(
+                level="INFO",
+                component="runtime",
+                event="epoch_runtime",
+                payload={
+                    "epoch": epoch,
+                    "global_step": self._global_step,
+                    "epoch_elapsed_seconds": epoch_duration,
+                    "device_backend": cfg.device_meta.backend,
+                },
+            )
 
             if epoch % 10 == 0 or epoch == cfg.n_epochs:
                 logger.info(
@@ -586,6 +664,16 @@ class CQLTrainer:
                     cfg=cfg,
                     optimizer_state_dict=self._optimizer.state_dict(),
                 )
+                self._training_event_logger.log_event(
+                    level="INFO",
+                    component="checkpoint",
+                    event="saved",
+                    payload={
+                        "epoch": epoch,
+                        "global_step": self._global_step,
+                        "checkpoint_path": str(last_ckpt),
+                    },
+                )
 
             final_td = epoch_metrics["td_loss_mean"]
             final_cql = epoch_metrics["cql_loss_mean"]
@@ -599,6 +687,43 @@ class CQLTrainer:
             elapsed,
         )
 
+        report_artifacts: dict[str, Any] | None = None
+        try:
+            artifacts = generate_training_report_artifacts(
+                cfg,
+                algorithm=cfg.algorithm,
+                state_dim=self._dataset.state_dim,
+                n_actions=self._n_actions,
+                total_steps=self._global_step,
+                elapsed_seconds=elapsed,
+                final_metrics={
+                    "td_loss_mean": final_td,
+                    "cql_loss_mean": final_cql,
+                    "total_loss_mean": final_total,
+                },
+                checkpoint_path=last_ckpt,
+                epoch_durations=epoch_durations,
+                training_log_path=self._training_event_logger.log_path,
+                runtime_log_path=self._runtime_event_logger.log_path,
+            )
+            report_artifacts = artifacts.to_dict()
+        except Exception:
+            logger.exception("Failed to generate CQL reporting artifacts.")
+
+        self._training_event_logger.log_event(
+            level="INFO",
+            component="trainer",
+            event="run_complete",
+            payload={
+                "elapsed_seconds": elapsed,
+                "total_steps": self._global_step,
+                "checkpoint_path": str(last_ckpt) if last_ckpt else None,
+                "report_artifact_dir": report_artifacts["artifact_dir"]
+                if report_artifacts
+                else None,
+            },
+        )
+
         return CQLTrainingResult(
             n_epochs=cfg.n_epochs,
             total_steps=self._global_step,
@@ -610,6 +735,7 @@ class CQLTrainer:
             state_dim=self._dataset.state_dim,
             n_actions=self._n_actions,
             device_backend=cfg.device_meta.backend,
+            report_artifacts=report_artifacts,
         )
 
     def get_policy(self) -> CQLPolicy:

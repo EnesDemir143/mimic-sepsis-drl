@@ -24,6 +24,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mimic_sepsis_rl.training.common import (
+    EventLogger,
     MetricLogger,
     ReplayDataset,
     TransitionBatch,
@@ -39,6 +40,7 @@ from mimic_sepsis_rl.training.config import (
 )
 from mimic_sepsis_rl.training.cql import QNetwork
 from mimic_sepsis_rl.training.device import validate_mps_ops
+from mimic_sepsis_rl.reporting.offline_rl import generate_training_report_artifacts
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +152,7 @@ class IQLTrainingResult:
     state_dim: int
     n_actions: int
     device_backend: str
+    report_artifacts: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -168,6 +171,7 @@ class IQLTrainingResult:
             "state_dim": self.state_dim,
             "n_actions": self.n_actions,
             "device_backend": self.device_backend,
+            "report_artifacts": self.report_artifacts,
         }
 
 
@@ -268,6 +272,14 @@ class IQLTrainer:
 
         self._checkpoint_manager = build_checkpoint_manager(cfg)
         self._metric_logger = MetricLogger.from_config(cfg)
+        self._training_event_logger = EventLogger.from_config(
+            cfg,
+            filename="training.log",
+        )
+        self._runtime_event_logger = EventLogger.from_config(
+            cfg,
+            filename="runtime.log",
+        )
 
         self._global_step = 0
         self._start_time = 0.0
@@ -386,6 +398,10 @@ class IQLTrainer:
             "total_loss": critic_loss.item()
             + value_loss.item()
             + actor_loss.item(),
+            "mean_q_dataset": target_q.mean().item(),
+            "mean_v_dataset": values.mean().item(),
+            "advantage_mean": advantages.mean().item(),
+            "advantage_std": advantages.std(unbiased=False).item(),
         }
 
     def train(self) -> IQLTrainingResult:
@@ -403,6 +419,23 @@ class IQLTrainer:
         value_losses: list[float] = []
         actor_losses: list[float] = []
         total_losses: list[float] = []
+        epoch_durations: list[float] = []
+
+        self._training_event_logger.log_event(
+            level="INFO",
+            component="trainer",
+            event="run_start",
+            payload={
+                "algorithm": cfg.algorithm,
+                "experiment_name": cfg.logging.experiment_name,
+                "seed": cfg.runtime.seed,
+                "device_backend": cfg.device_meta.backend,
+                "batch_size": cfg.batch_size,
+                "gamma": cfg.gamma,
+                "n_epochs": cfg.n_epochs,
+                "n_actions": self._n_actions,
+            },
+        )
 
         logger.info(
             "Starting IQL training: epochs=%d batch_size=%d gamma=%.3f expectile=%.2f",
@@ -413,6 +446,7 @@ class IQLTrainer:
         )
 
         for epoch in range(1, cfg.n_epochs + 1):
+            epoch_started_at = time.time()
             critic_losses.clear()
             value_losses.clear()
             actor_losses.clear()
@@ -437,6 +471,8 @@ class IQLTrainer:
                         epoch=epoch,
                     )
 
+            epoch_duration = time.time() - epoch_started_at
+            epoch_durations.append(epoch_duration)
             epoch_metrics = {
                 "critic_loss_mean": sum(critic_losses) / max(len(critic_losses), 1),
                 "value_loss_mean": sum(value_losses) / max(len(value_losses), 1),
@@ -447,6 +483,27 @@ class IQLTrainer:
                 epoch,
                 self._global_step,
                 epoch_metrics,
+            )
+            self._training_event_logger.log_event(
+                level="INFO",
+                component="trainer",
+                event="epoch_end",
+                payload={
+                    "epoch": epoch,
+                    "global_step": self._global_step,
+                    "metrics": epoch_metrics,
+                },
+            )
+            self._runtime_event_logger.log_event(
+                level="INFO",
+                component="runtime",
+                event="epoch_runtime",
+                payload={
+                    "epoch": epoch,
+                    "global_step": self._global_step,
+                    "epoch_elapsed_seconds": epoch_duration,
+                    "device_backend": cfg.device_meta.backend,
+                },
             )
 
             if epoch % 10 == 0 or epoch == cfg.n_epochs:
@@ -482,6 +539,16 @@ class IQLTrainer:
                         "actor": self._actor_optimizer.state_dict(),
                     },
                 )
+                self._training_event_logger.log_event(
+                    level="INFO",
+                    component="checkpoint",
+                    event="saved",
+                    payload={
+                        "epoch": epoch,
+                        "global_step": self._global_step,
+                        "checkpoint_path": str(last_checkpoint),
+                    },
+                )
 
             final_critic_loss = epoch_metrics["critic_loss_mean"]
             final_value_loss = epoch_metrics["value_loss_mean"]
@@ -496,6 +563,44 @@ class IQLTrainer:
             elapsed_seconds,
         )
 
+        report_artifacts: dict[str, Any] | None = None
+        try:
+            artifacts = generate_training_report_artifacts(
+                cfg,
+                algorithm=cfg.algorithm,
+                state_dim=self._dataset.state_dim,
+                n_actions=self._n_actions,
+                total_steps=self._global_step,
+                elapsed_seconds=elapsed_seconds,
+                final_metrics={
+                    "critic_loss_mean": final_critic_loss,
+                    "value_loss_mean": final_value_loss,
+                    "actor_loss_mean": final_actor_loss,
+                    "total_loss_mean": final_total_loss,
+                },
+                checkpoint_path=last_checkpoint,
+                epoch_durations=epoch_durations,
+                training_log_path=self._training_event_logger.log_path,
+                runtime_log_path=self._runtime_event_logger.log_path,
+            )
+            report_artifacts = artifacts.to_dict()
+        except Exception:
+            logger.exception("Failed to generate IQL reporting artifacts.")
+
+        self._training_event_logger.log_event(
+            level="INFO",
+            component="trainer",
+            event="run_complete",
+            payload={
+                "elapsed_seconds": elapsed_seconds,
+                "total_steps": self._global_step,
+                "checkpoint_path": str(last_checkpoint) if last_checkpoint else None,
+                "report_artifact_dir": report_artifacts["artifact_dir"]
+                if report_artifacts
+                else None,
+            },
+        )
+
         return IQLTrainingResult(
             n_epochs=cfg.n_epochs,
             total_steps=self._global_step,
@@ -508,6 +613,7 @@ class IQLTrainer:
             state_dim=self._dataset.state_dim,
             n_actions=self._n_actions,
             device_backend=cfg.device_meta.backend,
+            report_artifacts=report_artifacts,
         )
 
     def get_policy(self) -> IQLPolicy:
