@@ -1,0 +1,96 @@
+{
+  "algorithm": "iql",
+  "epoch": 180,
+  "global_step": 99000,
+  "metrics": {
+    "critic_loss_mean": 9.54781322219155,
+    "value_loss_mean": 0.7118301598592238,
+    "actor_loss_mean": 8.234458337263627,
+    "total_loss_mean": 18.4941017193144
+  },
+  "config_dict": {
+    "algorithm": "iql",
+    "schema_version": "1.0.0",
+    "runtime": {
+      "requested_device": "cuda",
+      "effective_device": "cuda",
+      "torch_device_str": "cuda:0",
+      "seed": 42,
+      "num_workers": 0,
+      "device_meta": {
+        "backend": "cuda",
+        "requested_backend": "cuda",
+        "torch_device_str": "cuda:0",
+        "torch_version": "2.5.1+cu121",
+        "cuda_available": true,
+        "mps_available": false,
+        "mps_built": false,
+        "cuda_device_count": 1,
+        "cuda_device_name": "NVIDIA GeForce RTX 3070 Ti",
+        "python_version": "3.12.13",
+        "platform_system": "Windows",
+        "platform_machine": "AMD64",
+        "device_module_version": "1.0.0",
+        "fallback_applied": false,
+        "mps_fallback_ops_enabled": false
+      }
+    },
+    "checkpoint": {
+      "checkpoint_dir": "checkpoints\\iql",
+      "save_every_n_epochs": 20,
+      "keep_last_n": 3
+    },
+    "logging": {
+      "log_dir": "runs\\iql",
+      "experiment_name": "iql_baseline",
+      "log_every_n_steps": 50
+    },
+    "dataset_path": "data\\replay\\replay_train.parquet",
+    "dataset_meta_path": "data\\replay\\replay_train_meta.json",
+    "n_epochs": 200,
+    "batch_size": 256,
+    "gamma": 0.99,
+    "extra": {
+      "policy_hidden_sizes": [
+        256,
+        256
+      ],
+      "value_hidden_sizes": [
+        256,
+        256
+      ],
+      "critic_hidden_sizes": [
+        256,
+        256
+      ],
+      "actor_lr": 0.0001,
+      "critic_lr": 0.0003,
+      "value_lr": 0.0003,
+      "polyak_tau": 0.005,
+      "target_update_freq": 10,
+      "expectile": 0.7,
+      "temperature": 3.0,
+      "grad_clip": 10.0,
+      "dry_run_state_dim": 33
+    }
+  },
+  "device_meta": {
+    "backend": "cuda",
+    "requested_backend": "cuda",
+    "torch_device_str": "cuda:0",
+    "torch_version": "2.5.1+cu121",
+    "cuda_available": true,
+    "mps_available": false,
+    "mps_built": false,
+    "cuda_device_count": 1,
+    "cuda_device_name": "NVIDIA GeForce RTX 3070 Ti",
+    "python_version": "3.12.13",
+    "platform_system": "Windows",
+    "platform_machine": "AMD64",
+    "device_module_version": "1.0.0",
+    "fallback_applied": false,
+    "mps_fallback_ops_enabled": false
+  },
+  "timestamp": 1776634219.1341527,
+  "module_version": "1.0.0"
+}
