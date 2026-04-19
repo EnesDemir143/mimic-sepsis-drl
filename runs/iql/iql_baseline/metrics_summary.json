@@ -1,0 +1,157 @@
+{
+  "algorithm": "iql",
+  "experiment_name": "iql_baseline",
+  "final_metrics": {
+    "actor_loss_mean": 8.393918595747515,
+    "critic_loss_mean": 9.433527197404342,
+    "total_loss_mean": 18.559181738116525,
+    "value_loss_mean": 0.731735944964669
+  },
+  "metric_count": 12,
+  "metrics": {
+    "actor_loss": {
+      "count": 120950,
+      "final": 5.749384880065918,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 24.494083404541016,
+      "mean": 5.896383413271058,
+      "median": 5.758153915405273,
+      "min": 1.0117340087890625
+    },
+    "actor_loss_mean": {
+      "count": 219,
+      "final": 8.393918595747515,
+      "first_epoch": 1,
+      "first_step": 550,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 8.448440278226679,
+      "mean": 5.910748030959248,
+      "median": 6.832161122668873,
+      "min": 1.6572079092806036
+    },
+    "advantage_mean": {
+      "count": 120950,
+      "final": -0.20598401129245758,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 0.23596714437007904,
+      "mean": -0.24646333523275124,
+      "median": -0.22923928499221802,
+      "min": -1.0034055709838867
+    },
+    "advantage_std": {
+      "count": 120950,
+      "final": 0.9661905765533447,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 2.245431900024414,
+      "mean": 0.9764371378266427,
+      "median": 1.0583799481391907,
+      "min": 0.11319834738969803
+    },
+    "critic_loss": {
+      "count": 120950,
+      "final": 6.921462059020996,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 53.884910583496094,
+      "mean": 12.447405845489124,
+      "median": 10.828532218933105,
+      "min": 3.1793339252471924
+    },
+    "critic_loss_mean": {
+      "count": 219,
+      "final": 9.433527197404342,
+      "first_epoch": 1,
+      "first_step": 550,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 31.15352603218772,
+      "mean": 12.434283265544945,
+      "median": 11.062691428444602,
+      "min": 9.37679726600647
+    },
+    "mean_q_dataset": {
+      "count": 120950,
+      "final": 9.320456504821777,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 10.249217987060547,
+      "mean": 7.106585622463597,
+      "median": 8.476832389831543,
+      "min": -0.1735800802707672
+    },
+    "mean_v_dataset": {
+      "count": 120950,
+      "final": 9.526439666748047,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 10.613321304321289,
+      "mean": 7.353048958062377,
+      "median": 8.7806077003479,
+      "min": -0.2084629386663437
+    },
+    "total_loss": {
+      "count": 120950,
+      "final": 13.088992595672607,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 57.44642025232315,
+      "mean": 18.786227691619633,
+      "median": 18.103294238448143,
+      "min": 4.738564381375909
+    },
+    "total_loss_mean": {
+      "count": 219,
+      "final": 18.559181738116525,
+      "first_epoch": 1,
+      "first_step": 550,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 33.145604172207584,
+      "mean": 18.788827731632075,
+      "median": 18.470913475318387,
+      "min": 17.246846563098106
+    },
+    "value_loss": {
+      "count": 120950,
+      "final": 0.41814565658569336,
+      "first_epoch": 1,
+      "first_step": 1,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 1.7868144512176514,
+      "mean": 0.44243843285945167,
+      "median": 0.4668332487344742,
+      "min": 0.005879061296582222
+    },
+    "value_loss_mean": {
+      "count": 219,
+      "final": 0.731735944964669,
+      "first_epoch": 1,
+      "first_step": 550,
+      "last_epoch": 200,
+      "last_step": 110000,
+      "max": 0.7322931319475174,
+      "mean": 0.4437964351278846,
+      "median": 0.5219174957817251,
+      "min": 0.009406798340549524
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "action_spec_version": "1.0.0",
+  "algorithm_name": "iql",
+  "batch_size": 256,
+  "checkpoint_path": "checkpoints\\iql\\iql_epoch0200_step0110000.pt",
+  "dataset_path": "data\\replay\\replay_train.parquet",
+  "dataset_version": "1.0.0",
+  "deterministic_mode": true,
+  "effective_backend": "cuda",
+  "experiment_group": "iql",
+  "final_metrics": {
+    "actor_loss_mean": 8.393918595747515,
+    "critic_loss_mean": 9.433527197404342,
+    "total_loss_mean": 18.559181738116525,
+    "value_loss_mean": 0.731735944964669
+  },
+  "gamma": 0.99,
+  "log_timestamp_format": "ISO8601",
+  "log_timezone": "Europe/Istanbul",
+  "metrics_log_path": "runs\\iql\\iql_baseline_metrics.jsonl",
+  "model_name": "iql",
+  "n_actions": 25,
+  "requested_device": "cuda",
+  "reward_version": "1.0.0",
+  "run_id": "iql_baseline",
+  "runtime_log_path": "runs\\iql\\iql_baseline\\runtime.log",
+  "seed": 42,
+  "split_label": "train",
+  "state_dim": 62,
+  "task_family": "offline_rl",
+  "task_type": "offline_reinforcement_learning",
+  "training_log_path": "runs\\iql\\iql_baseline\\training.log"
+}

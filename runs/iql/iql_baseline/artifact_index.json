@@ -1,0 +1,20 @@
+{
+  "artifact_dir": "runs\\iql\\iql_baseline",
+  "artifact_index_path": "runs\\iql\\iql_baseline\\artifact_index.json",
+  "evaluation_artifacts": {},
+  "metrics_summary_path": "runs\\iql\\iql_baseline\\metrics_summary.json",
+  "plots": {
+    "dataset_action_heatmap": "runs\\iql\\iql_baseline\\dataset_action_heatmap.png",
+    "episode_reward_curve": "runs\\iql\\iql_baseline\\episode_reward_curve.png",
+    "episode_reward_distribution": "runs\\iql\\iql_baseline\\episode_reward_distribution.png",
+    "episode_reward_rolling_curve": "runs\\iql\\iql_baseline\\episode_reward_rolling_curve.png",
+    "epoch_metrics": "runs\\iql\\iql_baseline\\epoch_metrics.png",
+    "q_diagnostics": "runs\\iql\\iql_baseline\\q_diagnostics.png",
+    "step_metrics": "runs\\iql\\iql_baseline\\step_metrics.png"
+  },
+  "run_manifest_path": "runs\\iql\\iql_baseline\\run_manifest.json",
+  "runtime_log_path": "runs\\iql\\iql_baseline\\runtime.log",
+  "runtime_summary_path": "runs\\iql\\iql_baseline\\runtime_summary.json",
+  "training_history_path": "runs\\iql\\iql_baseline\\training_history.json",
+  "training_log_path": "runs\\iql\\iql_baseline\\training.log"
+}
