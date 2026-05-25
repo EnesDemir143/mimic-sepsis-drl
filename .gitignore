@@ -245,3 +245,8 @@ pyrightconfig.json
 .git-workflow/
 
 /data/
+
+# Generated artifacts
+checkpoints/
+runs/
+.agents/
