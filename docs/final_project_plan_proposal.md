@@ -310,22 +310,9 @@ The project will also report:
 
 For WIS and ESS computation, behavior policy probabilities will be estimated from the training data using the implemented behavior cloning model or empirical action frequencies conditioned on the discretized state/action representation. WIS will be treated as a diagnostic metric because it can have high variance when the learned policy differs substantially from clinician behavior.
 
-### Baselines
-
-The final selected CQL policy will be compared against:
-
-1. **Clinician replay**
-   - evaluates observed clinician actions in the replay dataset.
-
-2. **No-treatment policy**
-   - a simple baseline that selects the no-vasopressor/no-fluid bin where applicable.
-
-3. **Behavior cloning**
-   - supervised learning baseline trained to imitate clinician actions.
-
 ### Final Test Evaluation
 
-The held-out test set is used only once after final model selection. The final test evaluation compares the selected CQL policy and baselines using:
+The held-out test set is used only once after final model selection. The final test evaluates the selected CQL policy using:
 
 - FQE with patient-level bootstrap 95% CI,
 - WIS,
@@ -416,10 +403,7 @@ These checks are essential because offline RL is highly sensitive to temporal le
    - support diagnostics.
 
 3. **Final test results table**
-   - selected CQL policy,
-   - clinician replay,
-   - no-treatment policy,
-   - behavior cloning,
+   - selected CQL policy only,
    - FQE,
    - WIS,
    - ESS,
@@ -493,9 +477,6 @@ The final project will proceed as follows:
 
 5. **Run final test evaluation once**
    - evaluate selected CQL policy,
-   - evaluate clinician replay,
-   - evaluate no-treatment policy,
-   - evaluate behavior cloning,
    - report FQE, WIS, ESS, support diagnostics, clinician agreement, and action heatmaps.
 
 6. **Prepare final report**
@@ -506,36 +487,6 @@ The final project will proceed as follows:
    - include ethics and data access,
    - include at least 10 IEEE-style references,
    - avoid clinical deployment claims.
-
-## 12. References Placeholder
-
-[1] A. Kumar, A. Zhou, G. Tucker, and S. Levine, “Conservative Q-learning for offline reinforcement learning,” in *Advances in Neural Information Processing Systems*, vol. 33, 2020, pp. 1179–1191.
-
-[2] S. Levine, A. Kumar, G. Tucker, and J. Fu, “Offline reinforcement learning: Tutorial, review, and perspectives on open problems,” *arXiv preprint arXiv:2005.01643*, 2020.
-
-[3] A. E. W. Johnson et al., “MIMIC-IV, a freely accessible electronic health record dataset,” *Scientific Data*, vol. 10, no. 1, 2023.
-
-[4] M. Singer et al., “The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3),” *JAMA*, vol. 315, no. 8, pp. 801–810, 2016.
-
-[5] M. Komorowski, L. A. Celi, O. Badawi, A. C. Gordon, and A. A. Faisal, “The Artificial Intelligence Clinician learns optimal treatment strategies for sepsis in intensive care,” *Nature Medicine*, vol. 24, no. 11, pp. 1716–1720, 2018.
-
-[6] O. Gottesman et al., “Guidelines for reinforcement learning in healthcare,” *Nature Medicine*, vol. 25, no. 1, pp. 16–18, 2019.
-
-[7] A. Raghu, M. Komorowski, L. A. Celi, P. Szolovits, and M. Ghassemi, “Continuous state-space models for optimal sepsis treatment: A deep reinforcement learning approach,” in *Machine Learning for Healthcare Conference*, 2017.
-
-[8] P. S. Thomas and E. Brunskill, “Data-efficient off-policy policy evaluation for reinforcement learning,” in *International Conference on Machine Learning*, 2016, pp. 2139–2148.
-
-[9] D. Precup, R. S. Sutton, and S. Singh, “Eligibility traces for off-policy policy evaluation,” in *Proceedings of the 17th International Conference on Machine Learning*, 2000, pp. 759–766.
-
-[10] A. R. Mahmood, H. P. van Hasselt, and R. S. Sutton, “Weighted importance sampling for off-policy learning with linear function approximation,” in *Advances in Neural Information Processing Systems*, 2014.
-
-[11] S. Fujimoto, D. Meger, and D. Precup, “Off-policy deep reinforcement learning without exploration,” in *International Conference on Machine Learning*, 2019, pp. 2052–2062.
-
-[12] J. Fu et al., “D4RL: Datasets for deep data-driven reinforcement learning,” *arXiv preprint arXiv:2004.07219*, 2020.
-
-[13] S. Tang and J. Wiens, “Model Selection for Offline Reinforcement Learning: Practical Considerations for Healthcare Settings,” in *Machine Learning for Healthcare Conference*, 2021.
-
-[14] S. Tang, J. Yao, J. Wiens, and S. Parbhoo, “Off by a beat: the effects of temporal misalignment in reinforcement learning for sepsis treatment,” *npj Digital Medicine*, 2026.
 
 ---
 
