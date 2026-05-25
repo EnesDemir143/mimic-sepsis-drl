@@ -257,7 +257,7 @@ def _run_stage1_evaluation(
                 best_metrics = {"fqe": fqe_mean, "wis": wis_val, "ess": ess_val}
 
         if best_fqe > float("-inf"):
-            if key not in config_scores or best_fqe > config_scores[key]["fqe"]:
+            if key not in config_scores or best_fqe > config_scores[key]["best_fqe"]:
                 config_scores[key] = {
                     "reward_variant": reward,
                     "learning_rate": float(lr),
