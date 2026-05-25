@@ -59,7 +59,7 @@ dataset_meta_path: "data/replay/replay_train_meta.json"
 n_epochs: 200
 
 # Mini-batch size for gradient updates.
-batch_size: 256
+batch_size: 4096
 
 # MDP discount factor γ.  Values close to 1.0 weight long-term outcomes
 # more heavily.  0.99 is a standard choice for episodic medical RL tasks.
