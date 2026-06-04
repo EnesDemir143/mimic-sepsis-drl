@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/) [![Model](https://img.shields.io/badge/HuggingFace-mimic--sepsis--cql-yellow)](https://huggingface.co/EnesDemir143/mimic-sepsis-cql) [![Report](https://img.shields.io/badge/Report-PDF-red)](report/main.pdf)
 
-This repository contains an academic offline reinforcement learning study on the MIMIC-IV v3.1 Sepsis-3 ICU cohort. The final reported model is a **Conservative Q-Learning (CQL)** policy for discretized IV fluid and vasopressor treatment decisions. The project emphasizes leakage-safe cohort construction, patient-level splits, validation-only model selection, and conservative off-policy evaluation rather than clinical deployment.
+This repository contains an academic offline reinforcement learning study on the MIMIC-IV v3.1 Sepsis-3 ICU cohort. The final reported model is a **Conservative Q-Learning (CQL)** policy for discretized IV fluid and vasopressor treatment decisions. The project emphasizes leakage-safe cohort construction, patient-level splits, validation-only model selection, and conservative off-policy evaluation rather than clinical deployment. The study cites the canonical MIMIC-IV, PhysioNet, Sepsis-3, healthcare RL, CQL, and off-policy evaluation references listed below.
 
 > **Clinical safety note:** This project is a retrospective research artifact. It is **not** a clinical decision support tool and must not be used for patient care.
 
@@ -140,3 +140,19 @@ Kocaeli University, Department of Computer Engineering
 ## Citation
 
 If you use this repository, cite MIMIC-IV and PhysioNet according to their official citation requirements and cite CQL/offline RL references as appropriate. See [report/references.bib](report/references.bib).
+
+## References
+
+This repository follows the citation set used in the final report. Key references are:
+
+1. Johnson et al., **MIMIC-IV, a freely accessible electronic health record dataset**, *Scientific Data*, 2023. DOI: [10.1038/s41597-022-01899-x](https://doi.org/10.1038/s41597-022-01899-x).
+2. Johnson et al., **MIMIC-IV (version 3.1)**, PhysioNet, 2024. DOI: [10.13026/kpb9-mt58](https://doi.org/10.13026/kpb9-mt58).
+3. Goldberger et al., **PhysioBank, PhysioToolkit, and PhysioNet**, *Circulation*, 2000. DOI: [10.1161/01.CIR.101.23.e215](https://doi.org/10.1161/01.CIR.101.23.e215).
+4. Singer et al., **The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3)**, *JAMA*, 2016. DOI: [10.1001/jama.2016.0287](https://doi.org/10.1001/jama.2016.0287).
+5. Komorowski et al., **The Artificial Intelligence Clinician learns optimal treatment strategies for sepsis in intensive care**, *Nature Medicine*, 2018. DOI: [10.1038/s41591-018-0213-5](https://doi.org/10.1038/s41591-018-0213-5).
+6. Gottesman et al., **Guidelines for reinforcement learning in healthcare**, *Nature Medicine*, 2019. DOI: [10.1038/s41591-018-0310-5](https://doi.org/10.1038/s41591-018-0310-5).
+7. Kumar et al., **Conservative Q-Learning for Offline Reinforcement Learning**, NeurIPS, 2020. DOI: [10.48550/arXiv.2006.04779](https://doi.org/10.48550/arXiv.2006.04779).
+8. Levine et al., **Offline Reinforcement Learning: Tutorial, Review, and Perspectives on Open Problems**, arXiv, 2020. DOI: [10.48550/arXiv.2005.01643](https://doi.org/10.48550/arXiv.2005.01643).
+9. Thomas and Brunskill, **Data-Efficient Off-Policy Policy Evaluation for Reinforcement Learning**, ICML, 2016. DOI: [10.48550/arXiv.1604.00923](https://doi.org/10.48550/arXiv.1604.00923).
+
+The complete BibTeX file is available at [`report/references.bib`](report/references.bib).

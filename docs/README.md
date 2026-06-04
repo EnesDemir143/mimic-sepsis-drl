@@ -46,6 +46,10 @@ This folder is organized as a topic-oriented reference for the MIMIC Sepsis CQL 
 | Final PDF report | [../report/main.pdf](../report/main.pdf) |
 | Report figures and tables | [assets/report](assets/report) |
 
+## Citation and References
+
+The main citation list is available in the root [README](../README.md#references), the Turkish/English summaries, and [`../report/references.bib`](../report/references.bib). MIMIC-IV, PhysioNet, Sepsis-3, healthcare RL, CQL, and OPE references are included explicitly.
+
 ## Safety and Limitations
 
 Key safety constraints are documented in:

@@ -1,6 +1,6 @@
 # MIMIC Sepsis CQL Projesi — Türkçe Özet
 
-Bu proje, MIMIC-IV v3.1 yoğun bakım verisi üzerinde Sepsis-3 kohortu için **Conservative Q-Learning (CQL)** tabanlı çevrimdışı pekiştirmeli öğrenme çalışmasıdır. Amaç bir klinik karar destek sistemi dağıtmak değil; retrospektif sağlık verisi üzerinde sızıntısız, doğrulanabilir ve raporlanabilir bir offline RL deney çerçevesi kurmaktır.
+Bu proje, MIMIC-IV v3.1 yoğun bakım verisi üzerinde Sepsis-3 kohortu için **Conservative Q-Learning (CQL)** tabanlı çevrimdışı pekiştirmeli öğrenme çalışmasıdır. MIMIC-IV ve PhysioNet kaynakları, Sepsis-3 tanımı, sağlıkta RL uyarıları, CQL yöntemi ve OPE literatürü aşağıdaki kaynaklarla açıkça referanslanmıştır. Amaç bir klinik karar destek sistemi dağıtmak değil; retrospektif sağlık verisi üzerinde sızıntısız, doğrulanabilir ve raporlanabilir bir offline RL deney çerçevesi kurmaktır.
 
 ## Kısa Özet
 
@@ -68,3 +68,19 @@ PDF raporda şu başlıklar yer alır:
 ## Uyarı
 
 Bu proje araştırma amaçlıdır. Hasta bakımı veya gerçek zamanlı klinik karar desteği için kullanılmamalıdır.
+
+## Kaynaklar
+
+README ve final raporda kullanılan temel kaynaklar:
+
+1. Johnson ve ark., **MIMIC-IV, a freely accessible electronic health record dataset**, *Scientific Data*, 2023. DOI: [10.1038/s41597-022-01899-x](https://doi.org/10.1038/s41597-022-01899-x).
+2. Johnson ve ark., **MIMIC-IV (version 3.1)**, PhysioNet, 2024. DOI: [10.13026/kpb9-mt58](https://doi.org/10.13026/kpb9-mt58).
+3. Goldberger ve ark., **PhysioBank, PhysioToolkit, and PhysioNet**, *Circulation*, 2000. DOI: [10.1161/01.CIR.101.23.e215](https://doi.org/10.1161/01.CIR.101.23.e215).
+4. Singer ve ark., **The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3)**, *JAMA*, 2016. DOI: [10.1001/jama.2016.0287](https://doi.org/10.1001/jama.2016.0287).
+5. Komorowski ve ark., **The Artificial Intelligence Clinician learns optimal treatment strategies for sepsis in intensive care**, *Nature Medicine*, 2018. DOI: [10.1038/s41591-018-0213-5](https://doi.org/10.1038/s41591-018-0213-5).
+6. Gottesman ve ark., **Guidelines for reinforcement learning in healthcare**, *Nature Medicine*, 2019. DOI: [10.1038/s41591-018-0310-5](https://doi.org/10.1038/s41591-018-0310-5).
+7. Kumar ve ark., **Conservative Q-Learning for Offline Reinforcement Learning**, NeurIPS, 2020. DOI: [10.48550/arXiv.2006.04779](https://doi.org/10.48550/arXiv.2006.04779).
+8. Levine ve ark., **Offline Reinforcement Learning: Tutorial, Review, and Perspectives on Open Problems**, arXiv, 2020. DOI: [10.48550/arXiv.2005.01643](https://doi.org/10.48550/arXiv.2005.01643).
+9. Thomas ve Brunskill, **Data-Efficient Off-Policy Policy Evaluation for Reinforcement Learning**, ICML, 2016. DOI: [10.48550/arXiv.1604.00923](https://doi.org/10.48550/arXiv.1604.00923).
+
+Tam BibTeX listesi: [`../report/references.bib`](../report/references.bib).
