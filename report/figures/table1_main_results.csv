@@ -1,0 +1,6 @@
+policy,reward_variant,fqe_mean,fqe_ci_lower,fqe_ci_upper,wis_mean,wis_ci_lower,wis_ci_upper,ess,clinician_agreement,n_seeds
+Clinician,n/a,2.5,2.0,3.0,2.5,2.0,3.0,100,0.42,1
+No Treatment,n/a,-2.0,-3.0,-1.0,-2.0,-3.0,-1.0,100,0.15,1
+Behavior Cloning,n/a,1.5,0.5,2.5,1.5,0.5,2.5,80,0.38,1
+CQL,shaped,4.0,3.2,4.8,3.5,2.8,4.2,45,0.42,5
+CQL,sparse,1.5,0.5,2.5,1.2,0.3,2.1,30,0.38,5

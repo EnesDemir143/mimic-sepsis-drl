@@ -243,10 +243,32 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,linux
 
 .git-workflow/
+.planning/
+.codegraph/
+.agents/
+.omx/
 
+# Local academic delivery bundle and presentation notes (kept off GitHub)
+230202066/
+*.mov
+*.mp4
+*.zip
+/cql_project_report.md
+/sunum_rehberi.md
+/sunum_veri_rehberi.md
+/docs/project_report_template.md
+/docs/stage_resume_and_m2_speedup.md
+
+# Data and generated training artifacts
 /data/
-
-# Generated artifacts
 checkpoints/
 runs/
-.agents/
+
+# LaTeX build by-products; keep report/main.tex, report/references.bib, figures, and report/main.pdf
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.log
+report/*.out
+report/test_babel*.pdf
+report/build/

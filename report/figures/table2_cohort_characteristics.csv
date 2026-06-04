@@ -1,0 +1,10 @@
+characteristic,overall,survivor,non_survivor,p_value
+n_patients,5000,3500,1500,-
+age_mean,65.2,63.8,68.4,<0.001
+male_pct,58.0,57.0,60.0,0.12
+sofa_mean_admission,7.2,6.1,9.8,<0.001
+icu_los_days_mean,5.8,5.2,7.2,<0.001
+mech_vent_pct,62.0,55.0,78.0,<0.001
+vasopressor_pct,48.0,40.0,66.0,<0.001
+rrt_pct,12.0,8.0,21.0,<0.001
+charlson_mean,5.1,4.5,6.5,<0.001

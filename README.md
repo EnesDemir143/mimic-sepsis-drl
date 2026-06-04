@@ -1,221 +1,142 @@
-# MIMIC Sepsis Offline RL
+# MIMIC Sepsis CQL Offline Reinforcement Learning
 
-> Not: Bu repoyu çalıştırmadan önce ham MIMIC-IV dosyaları şu dizinde bulunmalıdır:
-> `data/raw/physionet.org/files/mimiciv/3.1`
-> Bu klasör yoksa veri pipeline'ı çalışmaz.
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/) [![Model](https://img.shields.io/badge/HuggingFace-mimic--sepsis--cql-yellow)](https://huggingface.co/EnesDemir143/mimic-sepsis-cql) [![Report](https://img.shields.io/badge/Report-PDF-red)](report/main.pdf)
 
-## Run Reports
+This repository contains an academic offline reinforcement learning study on the MIMIC-IV v3.1 Sepsis-3 ICU cohort. The final reported model is a **Conservative Q-Learning (CQL)** policy for discretized IV fluid and vasopressor treatment decisions. The project emphasizes leakage-safe cohort construction, patient-level splits, validation-only model selection, and conservative off-policy evaluation rather than clinical deployment.
 
-| Run | Report | Metrics | Final manifest | Visuals |
-|---|---|---|---|---|
-| CQL latest run | [docs/cql_run_report.md](docs/cql_run_report.md) | [runs/cql/cql_reference_metrics.jsonl](runs/cql/cql_reference_metrics.jsonl) | [checkpoints/cql/cql_epoch0200_step0110000_manifest.json](checkpoints/cql/cql_epoch0200_step0110000_manifest.json) | [docs/assets/cql-run](docs/assets/cql-run) |
+> **Clinical safety note:** This project is a retrospective research artifact. It is **not** a clinical decision support tool and must not be used for patient care.
 
-## Docs Index
+## Project Summary
 
-| Category | Document | Link |
-|---|---|---|
-| Cohort | Cohort selection rules | [docs/cohort_selection.md](docs/cohort_selection.md) |
-| Features | Feature dictionary | [docs/feature_dictionary.md](docs/feature_dictionary.md) |
-| Actions | Action mapping and discretization | [docs/action_mapping.md](docs/action_mapping.md) |
-| Rewards | Reward specification | [docs/reward_spec.md](docs/reward_spec.md) |
-| Training | CQL training reference | [docs/cql_training.md](docs/cql_training.md) |
-| Training | Pipeline and RL positioning | [docs/pipeline_rl_positioning.md](docs/pipeline_rl_positioning.md) |
-| Benchmarks | Baseline benchmarks | [docs/baseline_benchmarks.md](docs/baseline_benchmarks.md) |
-| Evaluation | Evaluation protocol | [docs/evaluation_protocol.md](docs/evaluation_protocol.md) |
-| Comparison | Model comparison envelope | [docs/model_comparison.md](docs/model_comparison.md) |
-| Reproducibility | Reproducibility guide | [docs/reproducibility.md](docs/reproducibility.md) |
-| Safety | Leakage boundaries | [docs/leakage_boundaries.md](docs/leakage_boundaries.md) |
+- **Dataset:** MIMIC-IV v3.1, requiring PhysioNet credentialed access. Raw patient data is not included in this repository.
+- **Task:** Offline RL for sepsis treatment policy evaluation.
+- **State space:** 62-dimensional ICU patient state representation.
+- **Action space:** 25 discrete treatment actions from 5 × 5 IV fluid and vasopressor bins.
+- **Algorithm:** Conservative Q-Learning (CQL).
+- **Selection protocol:** Two-stage validation-only model selection; held-out test used exactly once after final checkpoint selection.
+- **Final model on Hugging Face:** [EnesDemir143/mimic-sepsis-cql](https://huggingface.co/EnesDemir143/mimic-sepsis-cql)
+- **Full report:** [report/main.pdf](report/main.pdf)
 
-## TL;DR
-MIMIC-IV veri seti üzerinde, klinisyen tedavi yöntemleri ile Offline RL (Çevrimdışı Pekiştirmeli Öğrenme) modellerini (CQL, BCQ, IQL) değerlendiren; veri sızıntısına karşı yalıtılmış ve Sepsis-3 tabanlı şeffaf bir araştırma ve benchmark sistemidir.
+## Final CQL Result
 
-## 📌 Proje Hakkında
-Bu proje, MIMIC-IV içerisindeki yetişkin yoğun bakım (ICU) sepsis vakalarını 4 saatlik zaman adımlarına (onset -24h ile +48h arası) bölerek bir Markov Karar Sürecine (MDP) dönüştürmektedir.
+Final selected checkpoint:
 
-Ana amaç; veri sızıntısını önleyen (data leakage protected), **klinik olarak makul** ve makale/tez kalitesinde **yeniden üretilebilir (reproducible)** bir çevrimdışı pekiştirmeli öğrenme çalışma alanı sağlamaktır. Sistem online klinik kararlar vermek için değil, retrospektif çevrimdışı politikaları değerlendirmek (Offline Policy Evaluation - OPE) için tasarlanmıştır.
+```text
+checkpoints/cql_sweep/cql_s1024_sparse_lr1e-4_a0p05/cql_epoch0200_step0007000.pt
+```
 
-## 🚀 Temel Özellikler
-* **Hedef Kohort:** Sepsis-3 kriterlerine uygun yetişkin ICU (Yoğun Bakım) hastaları.
-* **MDP Altyapısı (Durum-Eylem):** Sürekli (continuous) hasta durum (state) vektörleri ve tedaviler için (vazopressör ve IV fluid dozlarına bağlı) **25 farklı ayrık eylem (discrete action)**.
-* **Katı Sızdırmazlık (Zero Leakage):** Eğitim, doğrulama ve test setleri hasta bazında (patient-level) ayrılarak "scaling / imputation" hesaplamaları tamamen eğitim setine sınırlanır.
-* **Güvenli RL Karşılaştırmaları:** En gelişmiş tutucu RL (CQL, BCQ, IQL) yaklaşımlarının aynı veriler ile adil karşılaştırmaları.
-* **Donanım Esnekliği:** Hem veri hem de PyTorch eğitim ortamı tek kod tabanından kodlanarak **Apple Silicon (MPS)** ve **NVIDIA GPU (CUDA)** üzerinde çalıştırılabilir.
+Final hyperparameters:
 
-## 🛠 Teknoloji Yığını
+| Field | Value |
+|---|---:|
+| reward variant | sparse |
+| learning rate | 1e-4 |
+| CQL alpha | 0.05 |
+| seed | 1024 |
+| selected epoch | 200 |
 
-| Bileşen / Kütüphane | Kullanım Amacı | Durum | Notlar |
-|-----------------------|-------|---------|--------|
-| **Python / uv** | Temel dil, modern ortam yönetimi | ✅ | Projenin çekirdeği |
-| **PyTorch & d3rlpy**  | Ağırlıklı ML eğitimi, offline RL opsiyonları | ✅ | Hem MPS hem CUDA performansı |
-| **Polars & PyArrow**  | Yüksek hızlı veri transformasyonu | ✅ | Parquet artifaktları üretebilme |
-| **scikit-learn**      | Veri imputasyonu, scaling, ayırma | ✅ | Baseline performans algoritmaları |
-| **Hydra & MLflow**    | Deney takibi ve konfigürasyon (config) | ✅ | Yeniden üretilebilirlik güvencesi |
+Held-out test evaluation:
 
-## 🏁 Çalıştırma Sırası
+| Metric | Value |
+|---|---:|
+| FQE mean | 15.689874 |
+| FQE 95% CI | [15.616595, 15.755585] |
+| WIS mean | 10.018438 |
+| WIS 95% CI | [4.121083, 12.658275] |
+| ESS | 10.408948 |
+| Test episodes | 2585 |
+| Bootstrap resamples | 1000 |
 
-Bu proje için temel kural şudur:
+The report interprets these values as evidence for a reproducible offline RL evaluation workflow, not as proof of clinical superiority.
 
-- Ham veri önce `data/raw/physionet.org/files/mimiciv/3.1` altında hazır olmalı.
-- Sonra veri pipeline'ı sırayla çalıştırılmalı.
-- En sonda seçilen yöntem (`cql`, `bcq`, `iql`) eğitilmelidir.
+## Report Overview
 
-### 1. Ortamı hazırla
+The PDF report summarizes the complete study in a paper-like format:
+
+1. **Cohort definition:** Sepsis-3-based ICU cohort construction from MIMIC-IV.
+2. **MDP formulation:** 4-hour decision windows, patient-level states, 25 treatment actions, sparse and shaped reward definitions.
+3. **Model selection:** Stage 1 hyperparameter screening and Stage 2 multi-seed validation without using the test set.
+4. **Evaluation:** FQE, WIS, ESS, bootstrap confidence intervals, clinician agreement, support diagnostics.
+5. **Limitations:** Retrospective EHR bias, OPE uncertainty, support mismatch, no prospective validation.
+
+See: [report/main.pdf](report/main.pdf)
+
+## Repository Layout
+
+```text
+configs/                 Training and runtime configuration files
+src/mimic_sepsis_rl/     Source code for cohort, MDP, training, and evaluation
+scripts/                 CQL sweep, final evaluation, and figure generation scripts
+docs/                    Project documentation organized by topic
+report/                  LaTeX source, figures, bibliography, and compiled PDF
+tests/                   Unit tests for data, MDP, training, and evaluation modules
+```
+
+Large local artifacts are intentionally excluded from GitHub:
+
+- raw MIMIC-IV data (`data/`)
+- replay buffers
+- training runs (`runs/`)
+- checkpoints (`checkpoints/`)
+- local academic delivery bundle (`230202066/`)
+- planning metadata (`.planning/`)
+
+## Documentation
+
+Start with the docs index:
+
+- [docs/README.md](docs/README.md) — topic-organized documentation index
+- [docs/README_TR.md](docs/README_TR.md) — Türkçe proje özeti
+- [docs/README_EN.md](docs/README_EN.md) — English project summary
+- [docs/final_model_selection.md](docs/final_model_selection.md) — final model selection protocol and metrics
+- [docs/reproducibility.md](docs/reproducibility.md) — reproducibility guide
+- [docs/evaluation_protocol.md](docs/evaluation_protocol.md) — OPE and validation protocol
+
+## Reproducibility
+
+Install dependencies:
 
 ```bash
 uv sync
 ```
 
-### 2. Kohortu üret
+Raw MIMIC-IV data must be available locally under:
 
-```bash
-uv run python -m mimic_sepsis_rl.cli.build_cohort \
-  --config configs/cohort/default.yaml \
-  --emit-audit
+```text
+data/raw/physionet.org/files/mimiciv/3.1
 ```
 
-Beklenen çıktı:
-
-- `data/processed/cohort/cohort.parquet`
-- `data/processed/cohort/excluded.parquet`
-- `data/processed/cohort/audit.json`
-
-### 3. Sepsis onset üret
+Build the replay dataset:
 
 ```bash
-uv run python -m mimic_sepsis_rl.data.onset \
-  --config configs/onset/default.yaml
-```
-
-Beklenen çıktı:
-
-- `data/processed/onset/onset_assignments.parquet`
-- `data/processed/onset/onset_candidates.parquet`
-- `data/processed/onset/unusable_episodes.parquet`
-- `data/processed/onset/onset_audit.json`
-
-### 4. Episode grid üret
-
-```bash
+uv run python -m mimic_sepsis_rl.cli.build_cohort --config configs/cohort/default.yaml --emit-audit
+uv run python -m mimic_sepsis_rl.data.onset --config configs/onset/default.yaml
 uv run python -m mimic_sepsis_rl.cli.build_episode_grid
-```
-
-Beklenen çıktı:
-
-- `data/processed/episodes/episodes.parquet`
-- `data/processed/episodes/episode_steps.parquet`
-- `data/processed/episodes/grid_audit.json`
-
-### 5. Train / validation / test split üret
-
-```bash
-uv run python -m mimic_sepsis_rl.data.splits \
-  --config configs/splits/default.yaml \
-  --source-episode-set data/processed/episodes/episodes.parquet
-```
-
-Beklenen çıktı:
-
-- `data/splits/train_manifest.parquet`
-- `data/splits/validation_manifest.parquet`
-- `data/splits/test_manifest.parquet`
-- `data/splits/split_summary.json`
-
-### 6. State / action / reward / replay dataset üret
-
-```bash
+uv run python -m mimic_sepsis_rl.data.splits --config configs/splits/default.yaml --source-episode-set data/processed/episodes/episodes.parquet
 uv run python -m mimic_sepsis_rl.cli.build_transitions
 ```
 
-Beklenen ana çıktılar:
-
-- `data/processed/features/state_vectors/state_table_raw.parquet`
-- `data/processed/features/state_vectors/state_table_normalized.parquet`
-- `data/processed/features/train_medians.json`
-- `data/processed/features/state_vectors/preprocessing_artifacts.json`
-- `data/processed/actions/action_bins.json`
-- `data/processed/actions/step_actions.parquet`
-- `data/processed/rewards/reward_config.json`
-- `data/processed/rewards/step_rewards.parquet`
-- `data/replay/replay_train.parquet`
-- `data/replay/replay_train_meta.json`
-- `data/replay/replay_validation.parquet`
-- `data/replay/replay_validation_meta.json`
-- `data/replay/replay_test.parquet`
-- `data/replay/replay_test_meta.json`
-
-### 7. Runtime doğrulaması yap
-
-```bash
-uv run python -m mimic_sepsis_rl.training.device --self-check
-```
-
-### 8. Eğitilecek yöntemi doğrula
-
-Burada sadece algoritma adı değişir:
-
-- `cql`
-- `bcq`
-- `iql`
-
-Örnek:
-
-```bash
-uv run python -m mimic_sepsis_rl.training.experiment_runner \
-  --algorithm cql \
-  --describe
-
-uv run python -m mimic_sepsis_rl.training.experiment_runner \
-  --algorithm cql \
-  --dry-run
-```
-
-### 9. Eğitimi başlat
+Train CQL:
 
 ```bash
 uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql
 ```
 
-BCQ veya IQL çalıştırmak için sadece algoritma parametresini değiştir:
+Evaluate the selected final policy:
 
 ```bash
-uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm bcq
-uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm iql
+uv run python scripts/evaluate_final_selected_policy.py   --checkpoint checkpoints/cql_sweep/cql_s1024_sparse_lr1e-4_a0p05/cql_epoch0200_step0007000.pt   --test-data data/replay/replay_test.parquet   --output runs/cql_sweep/final_test_evaluation.json   --bootstrap-resamples 1000
 ```
 
-### 10. Daha önce veri aşamalarını çalıştırdıysan
+## Data Access and Ethics
 
-Eğer sende şu dosyalar zaten varsa:
+MIMIC-IV is distributed through PhysioNet and requires credentialed access plus required training/certification. This repository does not include raw patient records or derived replay buffers.
 
-- `data/processed/cohort/*`
-- `data/processed/onset/*`
-- `data/processed/episodes/*`
-- `data/splits/*`
+## Author
 
-o zaman artık kalan minimum komutlar bunlar:
+Enes Demir — 230202066  
+Kocaeli University, Department of Computer Engineering
 
-```bash
-uv run python -m mimic_sepsis_rl.cli.build_transitions
+## Citation
 
-uv run python -m mimic_sepsis_rl.training.device --self-check
-
-uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql --describe
-uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql --dry-run
-uv run python -m mimic_sepsis_rl.training.experiment_runner --algorithm cql
-```
-
-BCQ veya IQL için son üç komutta sadece `--algorithm` değeri değişir.
-
-⚠️ **MIMIC-IV Kullanımı Hakkında:** Orijinal hasta kayıtları üzerinde analiz apmak için **PhysioNet** kapsamında CITI sertifikası ve onaylı bir erişim yetkinliğine sahip olmanız gerekmektedir. Proje açık kaynaklı veri analitiği altyapısını içerir, hasta verisi barındırmaz.
-
-## 📚 Atıflar (Citations)
-
-Proje kapsamında MIMIC-IV veri setini kullanırken referans vermeniz gereken yayınlar:
-
-**MIMIC-IV Dataset:**
-> Johnson, A., Bulgarelli, L., Pollard, T., Gow, B., Moody, B., Horng, S., Celi, L. A., & Mark, R. (2024). MIMIC-IV (version 3.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/kpb9-mt58
-
-**MIMIC-IV Publication:**
-> Johnson, A.E.W., Bulgarelli, L., Shen, L. et al. MIMIC-IV, a freely accessible electronic health record dataset. Sci Data 10, 1 (2023). https://doi.org/10.1038/s41597-022-01899-x
-
-**PhysioNet Standard Citation:**
-> Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+If you use this repository, cite MIMIC-IV and PhysioNet according to their official citation requirements and cite CQL/offline RL references as appropriate. See [report/references.bib](report/references.bib).
