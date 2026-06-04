@@ -11,7 +11,7 @@ This project is an offline reinforcement learning study using **Conservative Q-L
 - **Action space:** 25 discrete actions from IV fluid and vasopressor bins.
 - **Algorithm:** Conservative Q-Learning (CQL).
 - **Selection:** Two-stage validation-only checkpoint/config selection.
-- **Final model:** [Hugging Face — EnesDemir143/mimic-sepsis-cql](https://huggingface.co/EnesDemir143/mimic-sepsis-cql)
+- **Final model:** [Hugging Face — morpeN1/mimic-sepsis-cql](https://huggingface.co/morpeN1/mimic-sepsis-cql)
 - **Report:** [../report/main.pdf](../report/main.pdf)
 
 ## Final Model

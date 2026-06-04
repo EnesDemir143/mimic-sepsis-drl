@@ -11,7 +11,7 @@ Bu proje, MIMIC-IV v3.1 yoğun bakım verisi üzerinde Sepsis-3 kohortu için **
 - **Aksiyon uzayı:** IV sıvı ve vazopressör dozlarına göre 5 × 5 = 25 ayrık aksiyon.
 - **Model:** Conservative Q-Learning (CQL).
 - **Seçim protokolü:** Test set kullanılmadan iki aşamalı validation seçimi.
-- **Final model:** [Hugging Face — EnesDemir143/mimic-sepsis-cql](https://huggingface.co/EnesDemir143/mimic-sepsis-cql)
+- **Final model:** [Hugging Face — morpeN1/mimic-sepsis-cql](https://huggingface.co/morpeN1/mimic-sepsis-cql)
 - **Rapor:** [../report/main.pdf](../report/main.pdf)
 
 ## Final Model

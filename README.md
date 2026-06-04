@@ -1,6 +1,6 @@
 # MIMIC Sepsis CQL Offline Reinforcement Learning
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/) [![Model](https://img.shields.io/badge/HuggingFace-mimic--sepsis--cql-yellow)](https://huggingface.co/EnesDemir143/mimic-sepsis-cql) [![Report](https://img.shields.io/badge/Report-PDF-red)](report/main.pdf)
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/) [![Model](https://img.shields.io/badge/HuggingFace-mimic--sepsis--cql-yellow)](https://huggingface.co/morpeN1/mimic-sepsis-cql) [![Report](https://img.shields.io/badge/Report-PDF-red)](report/main.pdf)
 
 This repository contains an academic offline reinforcement learning study on the MIMIC-IV v3.1 Sepsis-3 ICU cohort. The final reported model is a **Conservative Q-Learning (CQL)** policy for discretized IV fluid and vasopressor treatment decisions. The project emphasizes leakage-safe cohort construction, patient-level splits, validation-only model selection, and conservative off-policy evaluation rather than clinical deployment. The study cites the canonical MIMIC-IV, PhysioNet, Sepsis-3, healthcare RL, CQL, and off-policy evaluation references listed below.
 
@@ -14,7 +14,7 @@ This repository contains an academic offline reinforcement learning study on the
 - **Action space:** 25 discrete treatment actions from 5 × 5 IV fluid and vasopressor bins.
 - **Algorithm:** Conservative Q-Learning (CQL).
 - **Selection protocol:** Two-stage validation-only model selection; held-out test used exactly once after final checkpoint selection.
-- **Final model on Hugging Face:** [EnesDemir143/mimic-sepsis-cql](https://huggingface.co/EnesDemir143/mimic-sepsis-cql)
+- **Final model on Hugging Face:** [morpeN1/mimic-sepsis-cql](https://huggingface.co/morpeN1/mimic-sepsis-cql)
 - **Full report:** [report/main.pdf](report/main.pdf)
 
 ## Final CQL Result
